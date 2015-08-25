@@ -16,7 +16,7 @@ import boofcv.android.gui.VideoDisplayActivity;
 
 public class MainActivity extends VideoDisplayActivity {
 
-//Rfayhere
+//Rfayhereaaa
     @Override
     protected void onResume() {
         super.onResume();
