@@ -18,7 +18,7 @@ public class ColorProcessing extends VideoImageProcessing<MultiSpectral<ImageUIn
     protected ColorProcessing() {
         super(ImageType.ms(3, ImageUInt8.class));
     }
-
+//Test commit
 
 
     @Override
