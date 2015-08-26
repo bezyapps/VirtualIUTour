@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.hardware.Camera;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -16,7 +15,7 @@ import boofcv.android.gui.VideoDisplayActivity;
 
 public class MainActivity extends VideoDisplayActivity {
 
-
+//Rfayhereaaa
     @Override
     protected void onResume() {
         super.onResume();
