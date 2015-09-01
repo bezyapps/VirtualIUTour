@@ -69,7 +69,7 @@ public class MatchProcessing<Desc extends TupleDesc> extends VideoRenderProcessi
         listDst = UtilFeature.createQueue(detDesc,10);
        // ScoreAssociation score = FactoryAssociation.scoreEuclidean(detDesc.getDescriptionType(),true);
         ScoreAssociation score = FactoryAssociation.scoreNcc();
-        associate = FactoryAssociation.greedy(score,Double.MAX_VALUE,true);
+        associate = FactoryAssociation.greedy(score,0.09,true);
 //// AMMAR ENDS
 
         ///// We read the object image from resources. If you want to try you own image, then put a image in the
