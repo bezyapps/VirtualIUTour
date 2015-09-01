@@ -42,8 +42,8 @@ public class MainActivity extends VideoDisplayActivity {
 
         ///// setProcessing(new GrayProcessing());
         //// setProcessing(new ColorProcessing());
-
-        setProcessing(new MatchProcessing<>(this,s.width,s.height));
+        setProcessing(new MatchProcessing(this,s.width,s.height));
+     //   setProcessing(new CSVProcessing(this,s.width,s.height));
         return mCamera;
     }
 

@@ -21,21 +21,28 @@ import boofcv.android.ConvertBitmap;
 import boofcv.android.gui.VideoRenderProcessing;
 import boofcv.factory.feature.associate.FactoryAssociation;
 import boofcv.struct.feature.AssociatedIndex;
+import boofcv.struct.feature.SurfFeature;
+import boofcv.struct.feature.SurfFeatureQueue;
 import boofcv.struct.feature.TupleDesc;
+import boofcv.struct.feature.TupleDesc_F64;
 import boofcv.struct.image.ImageFloat32;
 import boofcv.struct.image.ImageType;
 import georegression.struct.point.Point2D_F64;
 
 /**
- * Created by Eric Bhatti on 8/19/2015.
+ * Created by ericbhatti on 9/1/15.
+ * <p/>
+ * <p/>
+ * <p/> Class Description:
  *
- * I have copied the logic in this class from the Android App demo of BoofCV.
- * I don't know how some of the things work in this class, i have pointed them out further in it.
- * Please help us understand the pointed out methods.
- *
- *
+ * @author Eric Bhatti
+ *         <p/>
+ *         Company Name: Arpatech (http://arpatech.com/)
+ *         <p/>
+ *         Jira Ticket: NULL
+ * @since 01 September, 2015
  */
-public class MatchProcessing<Desc extends TupleDesc> extends VideoRenderProcessing<ImageFloat32> {
+public class CSVProcessing<Desc extends TupleDesc> extends VideoRenderProcessing<ImageFloat32> {
 
     DetectDescribePoint<ImageFloat32,Desc> detDesc;
     AssociateDescription<Desc> associate;
@@ -55,7 +62,7 @@ public class MatchProcessing<Desc extends TupleDesc> extends VideoRenderProcessi
     List<Point2D_F64> pointsDst = new ArrayList<Point2D_F64>();
 
     Paint paint = new Paint();
-    public MatchProcessing(Context context, int width, int height){
+    public CSVProcessing(Context context, int width, int height){
         super(ImageType.single(ImageFloat32.class));
 
         detDesc = CreateDetectorDescriptor.create(CreateDetectorDescriptor.DETECT_FH,CreateDetectorDescriptor.DESC_SURF,ImageFloat32.class);
@@ -63,13 +70,13 @@ public class MatchProcessing<Desc extends TupleDesc> extends VideoRenderProcessi
 
         //// AMMAR BEGINS
         //        ScoreAssociation score = FactoryAssociation.defaultScore(detDesc.getDescriptionType());
-     ///   associate = FactoryAssociation.greedy(score,Double.MAX_VALUE,true);
+        ///   associate = FactoryAssociation.greedy(score,Double.MAX_VALUE,true);
 
         listSrc = UtilFeature.createQueue(detDesc, 10);
         listDst = UtilFeature.createQueue(detDesc,10);
 
-       // ScoreAssociation score = FactoryAssociation.scoreEuclidean(TupleDesc.class,true);
-       // associate = FactoryAssociation.greedy(score, Double.MAX_VALUE, true);
+        // ScoreAssociation score = FactoryAssociation.scoreEuclidean(TupleDesc.class,true);
+        // associate = FactoryAssociation.greedy(score, Double.MAX_VALUE, true);
 
 
 
@@ -78,11 +85,11 @@ public class MatchProcessing<Desc extends TupleDesc> extends VideoRenderProcessi
 
         //ScoreAssociation score = FactoryAssociation.scoreSad(detDesc.getDescriptionType());
 
-       // ScoreAssociation score = FactoryAssociation.defaultScore(detDesc.getDescriptionType());
-       // Log.e("ERBL",score.);
-       // Log.e("ERBL", String.valueOf(score.getScoreType().isZeroBest()));
-        ScoreAssociation score = FactoryAssociation.scoreEuclidean(detDesc.getDescriptionType(),true);
-        Log.e("ERBL",score.getScoreType().toString());
+        // ScoreAssociation score = FactoryAssociation.defaultScore(detDesc.getDescriptionType());
+        // Log.e("ERBL",score.);
+        // Log.e("ERBL", String.valueOf(score.getScoreType().isZeroBest()));
+        ScoreAssociation score = FactoryAssociation.scoreEuclidean(detDesc.getDescriptionType(), true);
+        Log.e("ERBL", score.getScoreType().toString());
         Log.e("ERBL", String.valueOf(score.getScoreType().compareTo(-1,1)));
         Log.e("ERBL", String.valueOf(score.getScoreType().isZeroBest()));
         associate = FactoryAssociation.greedy(score,0.08,true);
@@ -95,7 +102,7 @@ public class MatchProcessing<Desc extends TupleDesc> extends VideoRenderProcessi
 
         ///// We read the object image from resources. If you want to try you own image, then put a image in the
         ///// res/drawable folder with the name of 'camera_image.jpg' because that is the image we get here
-        Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.camera_image);
+       /* Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.camera_image);
         ImageFloat32 imageFloat32 = new ImageFloat32(bitmap.getWidth(),bitmap.getHeight());
         byte[] storage = null;
         ConvertBitmap.declareStorage(bitmap, storage);
@@ -108,8 +115,23 @@ public class MatchProcessing<Desc extends TupleDesc> extends VideoRenderProcessi
         //// it feature whenever a new feature is received. Hence saving computation.
 
         detDesc.detect(imageFloat32);
-        describeImage(listSrc, locationSrc);
-        associate.setSource(listSrc);
+        describeImage(listSrc, locationSrc);*/
+        try {
+            CSVToList csvToList = new CSVToList(context);
+            csvToList.convertCSVsToList();
+            Log.e("ERBL", String.valueOf(csvToList.listSrc.size()));
+            for(SurfFeature surfFeature : csvToList.listSrc.data)
+            {
+                listSrc.add((Desc) surfFeature);
+                Log.e("TEST", "");
+            }
+//            listSrc = csvToList.listSrc;
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+            associate.setSource(listSrc);
 
         output = Bitmap.createBitmap(width,height,Bitmap.Config.ARGB_8888 );
         outputGUI = Bitmap.createBitmap(width,height,Bitmap.Config.ARGB_8888 );
@@ -136,14 +158,14 @@ public class MatchProcessing<Desc extends TupleDesc> extends VideoRenderProcessi
         }
         synchronized (new Object())
         {
-            pointsSrc.clear();
+            //pointsSrc.clear();
             pointsDst.clear();
 
             FastQueue<AssociatedIndex> matches = associate.getMatches();
             for( int i = 0; i < matches.size; i++ ) {
                 AssociatedIndex m = matches.get(i);
-             //   m.
-                pointsSrc.add(locationSrc.get(m.src));
+                //   m.
+          //      pointsSrc.add(locationSrc.get(m.src));
                 pointsDst.add(locationDst.get(m.dst));
             }
         }
