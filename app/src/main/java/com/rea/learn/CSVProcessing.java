@@ -2,7 +2,6 @@ package com.rea.learn;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -22,9 +21,7 @@ import boofcv.android.gui.VideoRenderProcessing;
 import boofcv.factory.feature.associate.FactoryAssociation;
 import boofcv.struct.feature.AssociatedIndex;
 import boofcv.struct.feature.SurfFeature;
-import boofcv.struct.feature.SurfFeatureQueue;
 import boofcv.struct.feature.TupleDesc;
-import boofcv.struct.feature.TupleDesc_F64;
 import boofcv.struct.image.ImageFloat32;
 import boofcv.struct.image.ImageType;
 import georegression.struct.point.Point2D_F64;
@@ -47,7 +44,9 @@ public class CSVProcessing<Desc extends TupleDesc> extends VideoRenderProcessing
     DetectDescribePoint<ImageFloat32,Desc> detDesc;
     AssociateDescription<Desc> associate;
 
-    FastQueue<Desc> listSrc;
+    FastQueue<Desc> listHelmetSrc;
+
+    FastQueue<Desc> listCalSrc;
     FastQueue<Desc> listDst;
     FastQueue<Point2D_F64> locationSrc = new FastQueue<Point2D_F64>(Point2D_F64.class,true);
     FastQueue<Point2D_F64> locationDst = new FastQueue<Point2D_F64>(Point2D_F64.class,true);
@@ -59,7 +58,8 @@ public class CSVProcessing<Desc extends TupleDesc> extends VideoRenderProcessing
     private Bitmap output;
 
     List<Point2D_F64> pointsSrc = new ArrayList<Point2D_F64>();
-    List<Point2D_F64> pointsDst = new ArrayList<Point2D_F64>();
+    List<Point2D_F64> pointsDstHel = new ArrayList<Point2D_F64>();
+    List<Point2D_F64> pointsDstCal = new ArrayList<Point2D_F64>();
 
     Paint paint = new Paint();
     public CSVProcessing(Context context, int width, int height){
@@ -72,7 +72,9 @@ public class CSVProcessing<Desc extends TupleDesc> extends VideoRenderProcessing
         //        ScoreAssociation score = FactoryAssociation.defaultScore(detDesc.getDescriptionType());
         ///   associate = FactoryAssociation.greedy(score,Double.MAX_VALUE,true);
 
-        listSrc = UtilFeature.createQueue(detDesc, 10);
+        listHelmetSrc = UtilFeature.createQueue(detDesc, 10);
+
+        listCalSrc = UtilFeature.createQueue(detDesc, 10);
         listDst = UtilFeature.createQueue(detDesc,10);
 
         // ScoreAssociation score = FactoryAssociation.scoreEuclidean(TupleDesc.class,true);
@@ -92,7 +94,7 @@ public class CSVProcessing<Desc extends TupleDesc> extends VideoRenderProcessing
         Log.e("ERBL", score.getScoreType().toString());
         Log.e("ERBL", String.valueOf(score.getScoreType().compareTo(-1,1)));
         Log.e("ERBL", String.valueOf(score.getScoreType().isZeroBest()));
-        associate = FactoryAssociation.greedy(score,0.08,true);
+        associate = FactoryAssociation.greedy(score,0.1,true);
 
 
 
@@ -115,24 +117,29 @@ public class CSVProcessing<Desc extends TupleDesc> extends VideoRenderProcessing
         //// it feature whenever a new feature is received. Hence saving computation.
 
         detDesc.detect(imageFloat32);
-        describeImage(listSrc, locationSrc);*/
+        describeImage(listHelmetSrc, locationSrc);*/
         try {
             CSVToList csvToList = new CSVToList(context);
-            csvToList.convertCSVsToList();
-            Log.e("ERBL", String.valueOf(csvToList.listSrc.size()));
+            csvToList.convertCSVsToList("data.csv");
+            Log.e("ERBL_HELMET", String.valueOf(csvToList.listSrc.size()));
             for(SurfFeature surfFeature : csvToList.listSrc.data)
             {
-                listSrc.add((Desc) surfFeature);
+                listHelmetSrc.add((Desc) surfFeature);
                 Log.e("TEST", "");
             }
-//            listSrc = csvToList.listSrc;
+            csvToList.convertCSVsToList("data_2.csv");
+            Log.e("ERBL_CAL", String.valueOf(csvToList.listSrc.size()));
+            for(SurfFeature surfFeature : csvToList.listSrc.data)
+            {
+                listCalSrc.add((Desc) surfFeature);
+                Log.e("TEST", "");
+            }
+//            listHelmetSrc = csvToList.listHelmetSrc;
         }
         catch (Exception e)
         {
             e.printStackTrace();
         }
-            associate.setSource(listSrc);
-
         output = Bitmap.createBitmap(width,height,Bitmap.Config.ARGB_8888 );
         outputGUI = Bitmap.createBitmap(width,height,Bitmap.Config.ARGB_8888 );
         paint.setColor(Color.BLUE);
@@ -149,8 +156,10 @@ public class CSVProcessing<Desc extends TupleDesc> extends VideoRenderProcessing
         /// as in constructor
         detDesc.detect(gray);
         describeImage(listDst,locationDst);
+        associate.setSource(listHelmetSrc);
         associate.setDestination(listDst);
         associate.associate();
+        Log.e("DEST_SIZE" , String.valueOf(listDst.size()));
         synchronized (new Object()) {
             //ConvertBitmap.declareStorage(gray ,storage);
             ConvertBitmap.grayToBitmap(gray, output, storage);
@@ -159,14 +168,30 @@ public class CSVProcessing<Desc extends TupleDesc> extends VideoRenderProcessing
         synchronized (new Object())
         {
             //pointsSrc.clear();
-            pointsDst.clear();
+            pointsDstHel.clear();
 
             FastQueue<AssociatedIndex> matches = associate.getMatches();
             for( int i = 0; i < matches.size; i++ ) {
                 AssociatedIndex m = matches.get(i);
                 //   m.
           //      pointsSrc.add(locationSrc.get(m.src));
-                pointsDst.add(locationDst.get(m.dst));
+                pointsDstHel.add(locationDst.get(m.dst));
+            }
+        }
+        associate.setSource(listCalSrc);
+        associate.associate();
+
+        synchronized (new Object())
+        {
+            //pointsSrc.clear();
+            pointsDstCal.clear();
+
+            FastQueue<AssociatedIndex> matches = associate.getMatches();
+            for( int i = 0; i < matches.size; i++ ) {
+                AssociatedIndex m = matches.get(i);
+                //   m.
+                //      pointsSrc.add(locationSrc.get(m.src));
+                pointsDstCal.add(locationDst.get(m.dst));
             }
         }
     }
@@ -176,12 +201,18 @@ public class CSVProcessing<Desc extends TupleDesc> extends VideoRenderProcessing
         synchronized (new Object())
         {
             canvas.drawBitmap(outputGUI, 0, 0, null);
-            for(int i = 0; i < pointsDst.size(); i++) {
-                Point2D_F64 point2D_f64 = pointsDst.get(i);
+            paint.setColor(Color.RED);
+            for(int i = 0; i < pointsDstHel.size(); i++) {
+                Point2D_F64 point2D_f64 = pointsDstHel.get(i);
                 canvas.drawCircle(Float.parseFloat(String.valueOf(point2D_f64.getX())),Float.parseFloat(String.valueOf(point2D_f64.getY())),2,paint);
             }
-            Log.e("Features_D", String.valueOf(pointsDst.size()));
-            Log.e("Features_S", String.valueOf(pointsSrc.size()));
+            paint.setColor(Color.BLUE);
+            for(int i = 0; i < pointsDstCal.size(); i++) {
+                Point2D_F64 point2D_f64 = pointsDstCal.get(i);
+                canvas.drawCircle(Float.parseFloat(String.valueOf(point2D_f64.getX())),Float.parseFloat(String.valueOf(point2D_f64.getY())),2,paint);
+            }
+            Log.e("Features_HEL", String.valueOf(pointsDstHel.size()));
+            Log.e("Features_CAL", String.valueOf(pointsDstCal.size()));
 
         }
     }

@@ -52,6 +52,7 @@ public class TwoObjectProcessing<Desc extends TupleDesc> extends VideoRenderProc
     FastQueue<Point2D_F64> locationDst = new FastQueue<Point2D_F64>(Point2D_F64.class,true);
     // output image which is displayed by the GUI
     private Bitmap outputGUI;
+
     // storage used during image convert
     private byte[] storage;
     // output image which is modified by processing thread
@@ -93,7 +94,7 @@ public class TwoObjectProcessing<Desc extends TupleDesc> extends VideoRenderProc
         Log.e("ERBL", score.getScoreType().toString());
         Log.e("ERBL", String.valueOf(score.getScoreType().compareTo(-1,1)));
         Log.e("ERBL", String.valueOf(score.getScoreType().isZeroBest()));
-        associate = FactoryAssociation.greedy(score,0.08,true);
+        associate = FactoryAssociation.greedy(score,0.09,true);
 
 
 
@@ -120,7 +121,7 @@ public class TwoObjectProcessing<Desc extends TupleDesc> extends VideoRenderProc
         detDesc.detect(imageFloat32);
         describeImage(listSrc, locationSrc);
 
-
+        Log.e("ERBL CARD", String.valueOf(listSrc.size()));
         bitmap.recycle();
         bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.calculator3);
         imageFloat32 = new ImageFloat32(bitmap.getWidth(),bitmap.getHeight());
@@ -130,7 +131,7 @@ public class TwoObjectProcessing<Desc extends TupleDesc> extends VideoRenderProc
         detDesc.detect(imageFloat32);
         describeImage(listCalSrc, locationCalSrc);
 
-        Log.e("CAL: ", String.valueOf(listCalSrc.size()));
+        Log.e("ERBL CAL: ", String.valueOf(listCalSrc.size()));
 
         output = Bitmap.createBitmap(width,height,Bitmap.Config.ARGB_8888 );
         outputGUI = Bitmap.createBitmap(width,height,Bitmap.Config.ARGB_8888 );
@@ -153,6 +154,7 @@ public class TwoObjectProcessing<Desc extends TupleDesc> extends VideoRenderProc
             outputGUI = output;
         }
         describeImage(listDst, locationDst);
+        Log.e("DEST_SIZE" , String.valueOf(listDst.size()));
         associate.setSource(listSrc);
         associate.setDestination(listDst);
         associate.associate();

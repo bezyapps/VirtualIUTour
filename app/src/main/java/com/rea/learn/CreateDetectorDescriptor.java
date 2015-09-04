@@ -121,6 +121,7 @@ public class CreateDetectorDescriptor {
 
 			default:
 				throw new RuntimeException("Unknown descriptor");
+
 		}
 
 
@@ -138,6 +139,7 @@ public class CreateDetectorDescriptor {
 		ConfigFastHessian conf = new ConfigFastHessian();
 		conf.initialSampleSize = 2;
 		conf.extractRadius = 2;
+        conf.detectThreshold = 150;
 		conf.maxFeaturesPerScale = 120;
 		return conf;
 	}

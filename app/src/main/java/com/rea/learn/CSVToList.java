@@ -42,7 +42,7 @@ public class CSVToList {
 		listSrc.setDeclareInstances(true);
 		
 	//	TupleDesc<Desc> desc = new 
-	//	listSrc.add();
+	//	listHelmetSrc.add();
 	}
 
 	public CSVToList(Context context)
@@ -53,7 +53,7 @@ public class CSVToList {
 		this.context = context;
 	}
 	
-	public void convertCSVsToList() throws IOException
+	public void convertCSVsToList(String path) throws IOException
 	{
 		/*FileInputStream fileInputStream = new FileInputStream(new File(basePath + names[i] + ".csv"));
 		byte[] bytes = new byte[4096];
@@ -61,10 +61,12 @@ public class CSVToList {
 		while(fileInputStream.read(bytes) != -1) {
 			buffer.append(bytes);
 		}*/
+        listSrc.reset();
 			AssetManager assetManager = context.getAssets();
-		InputStream csvStream = assetManager.open("data.csv");
+		InputStream csvStream = assetManager.open(path);
 		InputStreamReader csvStreamReader = new InputStreamReader(csvStream);
 		CSVReader csvReader = new CSVReader(csvStreamReader);
+
 			int lines = 0;
 		String[] line;
 		while ((line = csvReader.readNext()) != null) {
@@ -103,7 +105,7 @@ while (stringTokenizerLines.hasMoreElements()) {
 			desc.value[count] = data;
 			count++;
 		}
-		listSrc.add(desc);
+		listHelmetSrc.add(desc);
 	}
 }*/
 	

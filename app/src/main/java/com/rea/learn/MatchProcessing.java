@@ -21,6 +21,7 @@ import boofcv.android.ConvertBitmap;
 import boofcv.android.gui.VideoRenderProcessing;
 import boofcv.factory.feature.associate.FactoryAssociation;
 import boofcv.struct.feature.AssociatedIndex;
+import boofcv.struct.feature.SurfFeature;
 import boofcv.struct.feature.TupleDesc;
 import boofcv.struct.image.ImageFloat32;
 import boofcv.struct.image.ImageType;
@@ -92,7 +93,6 @@ public class MatchProcessing<Desc extends TupleDesc> extends VideoRenderProcessi
 
 
 
-
 //// AMMAR ENDS
 
         ///// We read the object image from resources. If you want to try you own image, then put a image in the
@@ -110,6 +110,7 @@ public class MatchProcessing<Desc extends TupleDesc> extends VideoRenderProcessi
         //// it feature whenever a new feature is received. Hence saving computation.
 
         detDesc.detect(imageFloat32);
+
         describeImage(listSrc, locationSrc);
         associate.setSource(listSrc);
 
