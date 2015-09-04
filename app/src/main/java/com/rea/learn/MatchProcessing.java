@@ -86,9 +86,10 @@ public class MatchProcessing<Desc extends TupleDesc> extends VideoRenderProcessi
        // Log.e("ERBL", String.valueOf(score.getScoreType().isZeroBest()));
         ScoreAssociation score = FactoryAssociation.scoreEuclidean(detDesc.getDescriptionType(),true);
         Log.e("ERBL",score.getScoreType().toString());
-        Log.e("ERBL", String.valueOf(score.getScoreType().compareTo(-1,1)));
+        Log.e("ERBL", String.valueOf(score.getScoreType().compareTo(-1, 1)));
+        Log.e("ERBL", String.valueOf(score.getScoreType().compareTo(1,-1)));
         Log.e("ERBL", String.valueOf(score.getScoreType().isZeroBest()));
-        associate = FactoryAssociation.greedy(score,0.08,true);
+        associate = FactoryAssociation.greedy(score,0.2,true);
 
 
 
