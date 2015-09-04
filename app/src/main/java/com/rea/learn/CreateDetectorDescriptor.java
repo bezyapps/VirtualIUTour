@@ -145,6 +145,7 @@ public class CreateDetectorDescriptor {
 	private static ConfigSiftDetector confDetectSift() {
 		ConfigSiftDetector conf = new ConfigSiftDetector();
 		conf.extractRadius = 3;
+		conf.detectThreshold = 450;
 		conf.detectThreshold = 2;
 		conf.maxFeaturesPerScale = 120;
 		return conf;
