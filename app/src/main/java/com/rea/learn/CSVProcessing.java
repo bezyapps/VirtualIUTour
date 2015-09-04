@@ -40,12 +40,9 @@ import georegression.struct.point.Point2D_F64;
  * @since 01 September, 2015
  */
 public class CSVProcessing<Desc extends TupleDesc> extends VideoRenderProcessing<ImageFloat32> {
-
     DetectDescribePoint<ImageFloat32,Desc> detDesc;
     AssociateDescription<Desc> associate;
-
     FastQueue<Desc> listHelmetSrc;
-
     FastQueue<Desc> listCalSrc;
     FastQueue<Desc> listDst;
     FastQueue<Point2D_F64> locationSrc = new FastQueue<Point2D_F64>(Point2D_F64.class,true);
@@ -56,6 +53,7 @@ public class CSVProcessing<Desc extends TupleDesc> extends VideoRenderProcessing
     private byte[] storage;
     // output image which is modified by processing thread
     private Bitmap output;
+    //ok
 
     List<Point2D_F64> pointsSrc = new ArrayList<Point2D_F64>();
     List<Point2D_F64> pointsDstHel = new ArrayList<Point2D_F64>();

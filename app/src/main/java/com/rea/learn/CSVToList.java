@@ -66,9 +66,9 @@ public class CSVToList {
 		InputStream csvStream = assetManager.open(path);
 		InputStreamReader csvStreamReader = new InputStreamReader(csvStream);
 		CSVReader csvReader = new CSVReader(csvStreamReader);
-
 			int lines = 0;
 		String[] line;
+//ok
 		while ((line = csvReader.readNext()) != null) {
 				SurfFeature feature = new SurfFeature(64);
 				int count = 0;

@@ -103,15 +103,13 @@ public class MatchProcessing<Desc extends TupleDesc> extends VideoRenderProcessi
         byte[] storage = null;
         ConvertBitmap.declareStorage(bitmap, storage);
         ConvertBitmap.bitmapToGray(bitmap,imageFloat32,storage);
-
         ///// This is the main line which i don't understand, i am trying to figure it out. This line
         ///// detects interest points from the image, but where does it store them???
 
         //// We are processing the object image in the constructor because we don't want to recompute
         //// it feature whenever a new feature is received. Hence saving computation.
-
+        //ok
         detDesc.detect(imageFloat32);
-
         describeImage(listSrc, locationSrc);
         associate.setSource(listSrc);
 

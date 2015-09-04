@@ -43,7 +43,6 @@ public class TwoObjectProcessing<Desc extends TupleDesc> extends VideoRenderProc
 
     DetectDescribePoint<ImageFloat32,Desc> detDesc;
     AssociateDescription<Desc> associate;
-
     FastQueue<Desc> listSrc;
     FastQueue<Desc> listCalSrc;
     FastQueue<Desc> listDst;
@@ -51,8 +50,8 @@ public class TwoObjectProcessing<Desc extends TupleDesc> extends VideoRenderProc
     FastQueue<Point2D_F64> locationSrc = new FastQueue<Point2D_F64>(Point2D_F64.class,true);
     FastQueue<Point2D_F64> locationDst = new FastQueue<Point2D_F64>(Point2D_F64.class,true);
     // output image which is displayed by the GUI
+    // commit
     private Bitmap outputGUI;
-
     // storage used during image convert
     private byte[] storage;
     // output image which is modified by processing thread
