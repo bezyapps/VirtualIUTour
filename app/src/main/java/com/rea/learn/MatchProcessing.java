@@ -66,13 +66,13 @@ public class MatchProcessing<Desc extends TupleDesc> extends VideoRenderProcessi
 
         //// AMMAR BEGINS
         //        ScoreAssociation score = FactoryAssociation.defaultScore(detDesc.getDescriptionType());
-     ///   associate = FactoryAssociation.greedy(score,Double.MAX_VALUE,true);
+        ///   associate = FactoryAssociation.greedy(score,Double.MAX_VALUE,true);
 
         listSrc = UtilFeature.createQueue(detDesc, 10);
         listDst = UtilFeature.createQueue(detDesc,10);
 
-       // ScoreAssociation score = FactoryAssociation.scoreEuclidean(TupleDesc.class,true);
-       // associate = FactoryAssociation.greedy(score, Double.MAX_VALUE, true);
+        // ScoreAssociation score = FactoryAssociation.scoreEuclidean(TupleDesc.class,true);
+        // associate = FactoryAssociation.greedy(score, Double.MAX_VALUE, true);
 
 
 
@@ -81,9 +81,9 @@ public class MatchProcessing<Desc extends TupleDesc> extends VideoRenderProcessi
 
         //ScoreAssociation score = FactoryAssociation.scoreSad(detDesc.getDescriptionType());
 
-       // ScoreAssociation score = FactoryAssociation.defaultScore(detDesc.getDescriptionType());
-       // Log.e("ERBL",score.);
-       // Log.e("ERBL", String.valueOf(score.getScoreType().isZeroBest()));
+        // ScoreAssociation score = FactoryAssociation.defaultScore(detDesc.getDescriptionType());
+        // Log.e("ERBL",score.);
+        // Log.e("ERBL", String.valueOf(score.getScoreType().isZeroBest()));
         ScoreAssociation score = FactoryAssociation.scoreEuclidean(detDesc.getDescriptionType(),true);
         Log.e("ERBL",score.getScoreType().toString());
         Log.e("ERBL", String.valueOf(score.getScoreType().compareTo(-1, 1)));
@@ -144,7 +144,7 @@ public class MatchProcessing<Desc extends TupleDesc> extends VideoRenderProcessi
             FastQueue<AssociatedIndex> matches = associate.getMatches();
             for( int i = 0; i < matches.size; i++ ) {
                 AssociatedIndex m = matches.get(i);
-             //   m.
+                //   m.
                 pointsSrc.add(locationSrc.get(m.src));
                 pointsDst.add(locationDst.get(m.dst));
             }
