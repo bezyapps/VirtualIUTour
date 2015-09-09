@@ -16,9 +16,6 @@ import boofcv.struct.image.ImageUInt8;
 public class GrayProcessing extends VideoImageProcessing<ImageUInt8> {
 
 
-
-
-
     protected GrayProcessing() {
         super(ImageType.single(ImageUInt8.class));
     }
@@ -26,6 +23,5 @@ public class GrayProcessing extends VideoImageProcessing<ImageUInt8> {
     @Override
     protected void process(ImageUInt8 image, Bitmap output, byte[] storage) {
         ConvertBitmap.grayToBitmap(image,output,storage);
-
     }
 }
