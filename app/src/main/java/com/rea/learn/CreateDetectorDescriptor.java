@@ -1,6 +1,7 @@
 package com.rea.learn;
 
 import boofcv.abst.feature.describe.ConfigBrief;
+import boofcv.abst.feature.describe.ConfigSurfDescribe;
 import boofcv.abst.feature.describe.DescribeRegionPoint;
 import boofcv.abst.feature.detdesc.DetectDescribePoint;
 import boofcv.abst.feature.detect.interest.ConfigFast;
@@ -42,7 +43,9 @@ public class CreateDetectorDescriptor {
 
 	public static DetectDescribePoint create( int detect , int describe , Class imageType ) {
 		if( detect == DETECT_FH && describe == DESC_SURF ) {
-			return FactoryDetectDescribe.surfFast(confDetectFH(), null, null, imageType);
+			ConfigSurfDescribe.Speed speed = new ConfigSurfDescribe.Speed();
+			speed.useHaar = true;
+			return FactoryDetectDescribe.surfFast(confDetectFH(),speed, null, imageType);
 		} else if( detect == DETECT_SIFT && describe == DESC_SIFT ) {
 			return FactoryDetectDescribe.sift(null, confDetectSift(), null, null);
 		} else {

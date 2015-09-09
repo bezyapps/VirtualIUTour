@@ -15,6 +15,7 @@ import boofcv.android.gui.VideoDisplayActivity;
 
 public class MainActivity extends VideoDisplayActivity {
 //Ammar Here
+    ///Eric
 //Rfayhereaaa
     @Override
     protected void onResume() {
@@ -41,8 +42,8 @@ public class MainActivity extends VideoDisplayActivity {
 
         ///// setProcessing(new GrayProcessing());
         //// setProcessing(new ColorProcessing());
-
-        setProcessing(new MatchProcessing<>(this,s.width,s.height));
+        setProcessing(new MatchProcessing(this,s.width,s.height));
+     //   setProcessing(new CSVProcessing(this,s.width,s.height));
         return mCamera;
     }
 
