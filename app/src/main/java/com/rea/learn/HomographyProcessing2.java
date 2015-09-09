@@ -103,7 +103,7 @@ public class HomographyProcessing2<Desc extends TupleDesc> extends VideoRenderPr
         listSrc = UtilFeature.createQueue(detDesc, 100);
         listDst = UtilFeature.createQueue(detDesc,100);
         ScoreAssociation score = FactoryAssociation.scoreEuclidean(detDesc.getDescriptionType(),true);
-        associate = FactoryAssociation.greedy(score,2,true);
+        associate = FactoryAssociation.greedy(score,Double.MAX_VALUE,true);
 
         Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.camera_image);
         object = new ImageFloat32(bitmap.getWidth(),bitmap.getHeight());
@@ -337,6 +337,7 @@ public class HomographyProcessing2<Desc extends TupleDesc> extends VideoRenderPr
     protected void render(Canvas canvas, double v) {
         synchronized (new Object())
         {
+            canvas.drawBitmap(outputGUI, 0, 0, null);
             frame = ConvertBitmap.bitmapToGray(outputGUI,frame,storage);
             if(homography2D_f64 != null)
             {
@@ -371,7 +372,7 @@ public class HomographyProcessing2<Desc extends TupleDesc> extends VideoRenderPr
                         DistortSupport.transformScale(ImageFloat32.class, model, new ImplBilinearPixel_F32(), false, null);
 */
 
-                corners[0] = renderPoint(0,0,fromBtoWork);
+                corners[0] = renderPoint (0,0,fromBtoWork);
                 corners[1] = renderPoint(object.width,0,fromBtoWork);
                 corners[2] = renderPoint(object.width,object.height,fromBtoWork);
                 corners[3] = renderPoint(0,object.height,fromBtoWork);
@@ -384,7 +385,7 @@ public class HomographyProcessing2<Desc extends TupleDesc> extends VideoRenderPr
                 canvas.drawLine(corners[3].x,corners[3].y,corners[0].x,corners[0].y,paint);
             }
             else {
-                canvas.drawBitmap(outputGUI, 0, 0, null);
+
                 for (int i = 0; i < pointsDst.size(); i++) {
                     Point2D_F64 point2D_f64 = pointsDst.get(i);
                     canvas.drawCircle(Float.parseFloat(String.valueOf(point2D_f64.getX())), Float.parseFloat(String.valueOf(point2D_f64.getY())), 2, paint);
