@@ -19,24 +19,15 @@ import java.util.List;
 import boofcv.abst.feature.associate.AssociateDescription;
 import boofcv.abst.feature.associate.ScoreAssociation;
 import boofcv.abst.feature.detdesc.DetectDescribePoint;
-import boofcv.abst.feature.detect.interest.ConfigFastHessian;
 import boofcv.alg.distort.ImageDistort;
 import boofcv.alg.distort.PixelTransformHomography_F32;
-import boofcv.alg.distort.impl.DistortSupport;
 import boofcv.alg.feature.UtilFeature;
-import boofcv.alg.interpolate.impl.ImplBilinearPixel_F32;
 import boofcv.alg.sfm.robust.DistanceHomographySq;
 import boofcv.alg.sfm.robust.GenerateHomographyLinear;
 import boofcv.android.ConvertBitmap;
 import boofcv.android.gui.VideoRenderProcessing;
-import boofcv.core.image.ConvertBufferedImage;
-import boofcv.core.image.ConvertImage;
 import boofcv.factory.feature.associate.FactoryAssociation;
-import boofcv.factory.feature.detdesc.FactoryDetectDescribe;
-import boofcv.gui.image.ShowImages;
-import boofcv.io.image.UtilImageIO;
 import boofcv.struct.feature.AssociatedIndex;
-import boofcv.struct.feature.SurfFeature;
 import boofcv.struct.feature.TupleDesc;
 import boofcv.struct.geo.AssociatedPair;
 import boofcv.struct.image.ImageFloat32;
@@ -188,99 +179,6 @@ public class HomographyProcessing2<Desc extends TupleDesc> extends VideoRenderPr
         }
     }
 
-    /**
-     * Given two input images create and display an image where the two have been overlayed on top of each other.
-     */
-  /*  public static <T extends ImageSingleBand>
-    void stitch( BufferedImage imageA , BufferedImage imageB , Class<T> imageType )
-    {
-        T inputA = ConvertBufferedImage.convertFromSingle(imageA, null, imageType);
-        T inputB = ConvertBufferedImage.convertFromSingle(imageB, null, imageType);
-
-        // Detect using the standard SURF feature descriptor and describer
-        DetectDescribePoint detDesc = FactoryDetectDescribe.surfStable(
-                new ConfigFastHessian(1, 2, 200, 1, 9, 4, 4), null, null, imageType);
-        ScoreAssociation<SurfFeature> scorer = FactoryAssociation.scoreEuclidean(SurfFeature.class, true);
-        AssociateDescription<SurfFeature> associate = FactoryAssociation.greedy(scorer,2,true);
-
-        // fit the images using a homography.  This works well for rotations and distant objects.
-        ModelManager<Homography2D_F64> manager = new ModelManagerHomography2D_F64();
-        GenerateHomographyLinear modelFitter = new GenerateHomographyLinear(true);
-        DistanceHomographySq distance = new DistanceHomographySq();
-
-        ModelMatcher<Homography2D_F64,AssociatedPair> modelMatcher =
-                new Ransac<Homography2D_F64,AssociatedPair>(123,manager,modelFitter,distance,60,9);
-
-        Homography2D_F64 H = computeTransform(inputA, inputB, detDesc, associate, modelMatcher);
-
-        renderStitching(imageA, imageB, H);
-    }*/
-
-    /**
-     * Renders and displays the stitched together images
-     */
-    /*public static void renderStitching( BufferedImage imageA, BufferedImage imageB ,
-                                        Homography2D_F64 fromAtoB )
-    {
-        // specify size of output image
-        double scale = 0.5;
-        int outputWidth = imageA.getWidth();
-        int outputHeight = imageA.getHeight();
-
-
-
-                // Convert into a BoofCV color format
-        MultiSpectral<ImageFloat32> colorA =
-                ConvertBufferedImage.convertFromMulti(imageA, null, true, ImageFloat32.class);
-        MultiSpectral<ImageFloat32> colorB =
-                ConvertBufferedImage.convertFromMulti(imageB, null, true, ImageFloat32.class);
-
-        // Where the output images are rendered into
-        MultiSpectral<ImageFloat32> work = new MultiSpectral<ImageFloat32>(ImageFloat32.class,outputWidth,outputHeight,3);
-
-        // Adjust the transform so that the whole image can appear inside of it
-        Homography2D_F64 fromAToWork = new Homography2D_F64(scale,0,colorA.width/4,0,scale,colorA.height/4,0,0,1);
-        Homography2D_F64 fromWorkToA = fromAToWork.invert(null);
-
-        // Used to render the results onto an image
-        PixelTransformHomography_F32 model = new PixelTransformHomography_F32();
-        ImageDistort<MultiSpectral<ImageFloat32>,MultiSpectral<ImageFloat32>> distort =
-                DistortSupport.createDistortMS(ImageFloat32.class, model, new ImplBilinearPixel_F32(), false, null);
-
-        /*
-        // Render first image
-        model.set(fromWorkToA);
-        distort.apply(colorA,work);*/
-
-        // Render second image
-        //Homography2D_F64 fromWorkToB = fromWorkToA.concat(fromAtoB,null);
-      //  model.set(fromWorkToB);
-    //    distort.apply(colorB,work);
-
-        // Convert the rendered image into a BufferedImage
-       /* BufferedImage output = new BufferedImage(work.width,work.height,imageA.getType());
-        ConvertBufferedImage.convertTo(work, output, true);
-
-        Graphics2D g2 = output.createGraphics();
-
-        // draw lines around the distorted image to make it easier to see
-        Homography2D_F64 fromBtoWork = fromWorkToB.invert(null);
-        Point2D_I32 corners[] = new Point2D_I32[4];
-        corners[0] = renderPoint(0,0,fromBtoWork);
-        corners[1] = renderPoint(colorB.width,0,fromBtoWork);
-        corners[2] = renderPoint(colorB.width,colorB.height,fromBtoWork);
-        corners[3] = renderPoint(0,colorB.height,fromBtoWork);
-
-        g2.setColor(Color.ORANGE);
-        g2.setStroke(new BasicStroke(4));
-        g2.drawLine(corners[0].x,corners[0].y,corners[1].x,corners[1].y);
-        g2.drawLine(corners[1].x,corners[1].y,corners[2].x,corners[2].y);
-        g2.drawLine(corners[2].x,corners[2].y,corners[3].x,corners[3].y);
-        g2.drawLine(corners[3].x,corners[3].y,corners[0].x,corners[0].y);
-
-        ShowImages.showWindow(output, "Stitched Images");
-
-    }*/
 
     private static Point2D_I32 renderPoint( int x0 , int y0 , Homography2D_F64 fromBtoWork )
     {
@@ -353,8 +251,8 @@ public class HomographyProcessing2<Desc extends TupleDesc> extends VideoRenderPr
 
                 // Used to render the results onto an image
                 PixelTransformHomography_F32 model = new PixelTransformHomography_F32();
-                ImageDistort<MultiSpectral<ImageFloat32>,MultiSpectral<ImageFloat32>> distort =
-                        DistortSupport.createDistortMS(ImageFloat32.class, model, new ImplBilinearPixel_F32(), false, null);
+                ImageDistort<MultiSpectral<ImageFloat32>,MultiSpectral<ImageFloat32>> distort = null;
+                //    DistortSupport.createDistortMS(ImageFloat32.class, model, new ImplBilinearPixel_F32(), false, null);
 
 
                 // Render first image
@@ -368,10 +266,6 @@ public class HomographyProcessing2<Desc extends TupleDesc> extends VideoRenderPr
 
                 Homography2D_F64 fromBtoWork = fromWorkToB.invert(null);
                 Point2D_I32 corners[] = new Point2D_I32[4];
-               /* ImageDistort<ImageFloat32,ImageFloat32> distort =
-                        DistortSupport.transformScale(ImageFloat32.class, model, new ImplBilinearPixel_F32(), false, null);
-*/
-
                 corners[0] = renderPoint (0,0,fromBtoWork);
                 corners[1] = renderPoint(object.width,0,fromBtoWork);
                 corners[2] = renderPoint(object.width,object.height,fromBtoWork);

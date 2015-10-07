@@ -7,6 +7,7 @@ import android.text.Html;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.WindowManager;
 import android.widget.Toast;
 
 import java.util.List;
@@ -24,6 +25,7 @@ public class MainActivity extends VideoDisplayActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         setShowFPS(true);
     }
     Camera.Size s;
@@ -50,7 +52,8 @@ public class MainActivity extends VideoDisplayActivity {
         //// setProcessing(new ColorProcessing());
   //      setProcessing(new HomographyProcessing2(this,s.width,s.height));
      //   setProcessing(new CSVProcessing(this,s.width,s.height));
-        setProcessing(new AugmentProcessing(this,s.width,s.height));
+       // setProcessing(new RoomTagProcessing(this,s.width,s.height));
+        setProcessing(new ColouredAugmentProcessing(this,s.width,s.height));
         return mCamera;
     }
 
