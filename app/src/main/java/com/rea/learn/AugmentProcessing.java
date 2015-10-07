@@ -7,7 +7,9 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Picture;
+import android.graphics.Typeface;
 import android.util.Log;
+import android.widget.Toast;
 
 import org.ddogleg.struct.FastQueue;
 
@@ -44,7 +46,7 @@ public class AugmentProcessing <Desc extends TupleDesc> extends VideoRenderProce
 
     DetectDescribePoint<ImageFloat32,Desc> detDesc;
     AssociateDescription<Desc> associate;
-
+    Bitmap bm;
     FastQueue<Desc> listSrc;
     FastQueue<Desc> listCalSrc;
     FastQueue<Desc> listDst;
@@ -66,7 +68,7 @@ private int width, height;
         super(ImageType.single(ImageFloat32.class));
 
         detDesc = CreateDetectorDescriptor.create(CreateDetectorDescriptor.DETECT_FH,CreateDetectorDescriptor.DESC_SURF,ImageFloat32.class);
-
+        bm= BitmapFactory.decodeResource(context.getResources(), R.drawable.mark);
 this.width = width;
         this.height = height;
         //// AMMAR BEGINS
@@ -90,10 +92,10 @@ this.width = width;
         // Log.e("ERBL",score.);
         // Log.e("ERBL", String.valueOf(score.getScoreType().isZeroBest()));
         ScoreAssociation score = FactoryAssociation.scoreEuclidean(detDesc.getDescriptionType(), true);
-        Log.e("ERBL", score.getScoreType().toString());
+      /*  Log.e("ERBL", score.getScoreType().toString());
         Log.e("ERBL", String.valueOf(score.getScoreType().compareTo(-1, 1)));
         Log.e("ERBL", String.valueOf(score.getScoreType().compareTo(1,-1)));
-        Log.e("ERBL", String.valueOf(score.getScoreType().isZeroBest()));
+        Log.e("ERBL", String.valueOf(score.getScoreType().isZeroBest()));*/
         associate = FactoryAssociation.greedy(score,0.09,true);
 
 
@@ -199,18 +201,38 @@ this.width = width;
                 {
                     bottom = avg_Y + 30;
                 }
+                // Ammmar ediit starts
+                String text = "CARD";
 
-                canvas.drawRect(left, top, right, bottom, paint);
+                Typeface tf = Typeface.create("Helvetica", Typeface.BOLD);
+                Paint paint = new Paint();
+                paint.setStyle(Paint.Style.FILL);
+                paint.setColor(Color.BLUE);
+                paint.setTypeface(tf);
+                paint.setTextAlign(Paint.Align.CENTER);
+                paint.setTextSize(11);
+                canvas.drawBitmap(bm, avg_X-50,avg_Y-70, null);
+                Log.e("right", "" + right);
+                Log.e("left", "" + left);
+                Log.e("top",""+top);
+                Log.e("bottom",""+bottom);
+                Log.e("average X",""+avg_X);
+                Log.e("average y",""+avg_Y);
+
+
+                //ammar Edit ends
+
+                //canvas.drawRect(left, top, right, bottom, paint);
                 Paint paint2 = new Paint();
                 paint2.setColor(Color.RED);
                 paint2.setTextSize(20);
                 if(left != 0 && top != 0) {
-                    canvas.drawText("Card", left + 25, top + 30, paint2);
+                    canvas.drawText("Card", avg_X-30, avg_Y-30, paint2);
                 }
                 }
 
-            Log.e("Features_D", String.valueOf(pointsDst.size()));
-            Log.e("Features_S", String.valueOf(pointsSrc.size()));
+           // Log.e("Features_D", String.valueOf(pointsDst.size()));
+            //Log.e("Features_S", String.valueOf(pointsSrc.size()));
 
         }
     }
