@@ -1,14 +1,11 @@
 package com.rea.learn;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.hardware.Camera;
-import android.os.Bundle;
 import android.text.Html;
 import android.util.Log;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Toast;
 
@@ -51,8 +48,9 @@ public class MainActivity extends VideoDisplayActivity {
 
         ///// setProcessing(new GrayProcessing());
         //// setProcessing(new ColorProcessing());
-        setProcessing(new HomographyProcessing2(this,s.width,s.height));
+  //      setProcessing(new HomographyProcessing2(this,s.width,s.height));
      //   setProcessing(new CSVProcessing(this,s.width,s.height));
+        setProcessing(new AugmentProcessing(this,s.width,s.height));
         return mCamera;
     }
 
