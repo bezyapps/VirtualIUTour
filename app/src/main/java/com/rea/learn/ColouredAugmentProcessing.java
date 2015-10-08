@@ -6,6 +6,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Typeface;
 import android.util.Log;
 
 import org.ddogleg.struct.FastQueue;
@@ -33,6 +34,7 @@ import georegression.struct.point.Point2D_F64;
  */
 public class ColouredAugmentProcessing<Desc extends TupleDesc> extends VideoRenderProcessing<MultiSpectral<ImageFloat32>> {
 
+    private Bitmap bm;
     DetectDescribePoint<ImageFloat32,Desc> detDesc;
     AssociateDescription<Desc> associate;
 
@@ -57,7 +59,7 @@ public class ColouredAugmentProcessing<Desc extends TupleDesc> extends VideoRend
         super(ImageType.ms(3,ImageFloat32.class));
 
         detDesc = CreateDetectorDescriptor.create(CreateDetectorDescriptor.DETECT_FH,CreateDetectorDescriptor.DESC_SURF,ImageFloat32.class);
-
+        bm= BitmapFactory.decodeResource(context.getResources(), R.drawable.mark);
         this.width = width;
         this.height = height;
         //// AMMAR BEGINS
@@ -192,12 +194,30 @@ public class ColouredAugmentProcessing<Desc extends TupleDesc> extends VideoRend
                     bottom = avg_Y + 30;
                 }
 
-                canvas.drawRect(left, top, right, bottom, paint);
-                Paint paint2 = new Paint();
+               // canvas.drawRect(left, top, right, bottom, paint);
+
+                String text = "CARD";
+
+                Typeface tf = Typeface.create("Helvetica", Typeface.BOLD);
+                Paint paint = new Paint();
+                paint.setStyle(Paint.Style.FILL);
+                paint.setColor(Color.BLUE);
+                paint.setTypeface(tf);
+                paint.setTextAlign(Paint.Align.CENTER);
+                paint.setTextSize(12);
+                canvas.drawBitmap(bm, avg_X-50,avg_Y-70, null);
+                Log.e("right", "" + right);
+                Log.e("left", "" + left);
+                Log.e("top",""+top);
+                Log.e("bottom",""+bottom);
+                Log.e("average X",""+avg_X);
+                Log.e("average y",""+avg_Y);
+
+               /* Paint paint2 = new Paint();
                 paint2.setColor(Color.RED);
-                paint2.setTextSize(20);
+                paint2.setTextSize(20);*/
                 if(left != 0 && top != 0) {
-                    canvas.drawText("Card", left + 25, top + 30, paint2);
+                    canvas.drawText("Card", left + 30, top , paint);
                 }
             }
 
