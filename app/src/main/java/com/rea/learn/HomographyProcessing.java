@@ -22,14 +22,12 @@ import boofcv.abst.feature.detdesc.DetectDescribePoint;
 import boofcv.alg.distort.ImageDistort;
 import boofcv.alg.distort.PixelTransformHomography_F32;
 import boofcv.alg.distort.impl.DistortSupport;
-import boofcv.alg.feature.UtilFeature;
+import boofcv.alg.descriptor.UtilFeature;
+import boofcv.alg.geo.robust.DistanceHomographySq;
+import boofcv.alg.geo.robust.GenerateHomographyLinear;
 import boofcv.alg.interpolate.impl.ImplBilinearPixel_F32;
-import boofcv.alg.sfm.robust.DistanceHomographySq;
-import boofcv.alg.sfm.robust.GenerateHomographyLinear;
 import boofcv.android.ConvertBitmap;
 import boofcv.android.gui.VideoRenderProcessing;
-import boofcv.core.image.ConvertBufferedImage;
-import boofcv.core.image.ConvertImage;
 import boofcv.core.image.impl.ImplConvertMsToSingle;
 import boofcv.factory.feature.associate.FactoryAssociation;
 import boofcv.struct.feature.AssociatedIndex;
@@ -257,8 +255,8 @@ public class HomographyProcessing<Desc extends TupleDesc> extends VideoRenderPro
 
             // Used to render the results onto an image
             PixelTransformHomography_F32 model = new PixelTransformHomography_F32();
-            ImageDistort<MultiSpectral<ImageFloat32>,MultiSpectral<ImageFloat32>> distort =
-                    DistortSupport.createDistortMS(ImageFloat32.class, model, new ImplBilinearPixel_F32(),false, null);
+            ImageDistort<MultiSpectral<ImageFloat32>,MultiSpectral<ImageFloat32>> distort = null;
+                 //   DistortSupport.createDistortMS(ImageFloat32.class, model, new ImplBilinearPixel_F32(),false, null);
             // Render first image
             model.set(fromWorkToA);
             distort.apply(colorA, work);

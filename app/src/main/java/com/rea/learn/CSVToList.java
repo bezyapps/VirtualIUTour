@@ -17,7 +17,7 @@ import java.util.StringTokenizer;
 import org.ddogleg.struct.FastQueue;
 
 import boofcv.abst.feature.detdesc.DetectDescribePoint;
-import boofcv.alg.feature.UtilFeature;
+import boofcv.alg.descriptor.UtilFeature;
 import boofcv.struct.feature.SurfFeature;
 import boofcv.struct.feature.SurfFeatureQueue;
 import boofcv.struct.feature.TupleDesc;

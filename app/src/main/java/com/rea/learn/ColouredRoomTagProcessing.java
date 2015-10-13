@@ -16,7 +16,7 @@ import java.util.List;
 import boofcv.abst.feature.associate.AssociateDescription;
 import boofcv.abst.feature.associate.ScoreAssociation;
 import boofcv.abst.feature.detdesc.DetectDescribePoint;
-import boofcv.alg.feature.UtilFeature;
+import boofcv.alg.descriptor.UtilFeature;
 import boofcv.android.ConvertBitmap;
 import boofcv.android.gui.VideoRenderProcessing;
 import boofcv.core.image.ConvertImage;
@@ -32,7 +32,6 @@ import georegression.struct.point.Point2D_F64;
  * Created by BezyApps on 10/4/2015.
  */
 public class ColouredRoomTagProcessing<Desc extends TupleDesc> extends VideoRenderProcessing<MultiSpectral<ImageFloat32>> {
-
     DetectDescribePoint<ImageFloat32,Desc> detDesc;
     AssociateDescription<Desc> associate;
 

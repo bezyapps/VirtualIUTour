@@ -22,7 +22,7 @@ import boofcv.abst.tracker.ConfigCirculantTracker;
 import boofcv.abst.tracker.ConfigComaniciu2003;
 import boofcv.abst.tracker.MeanShiftLikelihoodType;
 import boofcv.abst.tracker.TrackerObjectQuad;
-import boofcv.alg.feature.UtilFeature;
+import boofcv.alg.descriptor.UtilFeature;
 import boofcv.alg.filter.derivative.DerivativeHelperFunctions;
 import boofcv.alg.interpolate.InterpolateRectangle;
 import boofcv.alg.interpolate.array.Interpolate1D_F32;

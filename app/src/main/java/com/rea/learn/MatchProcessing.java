@@ -16,7 +16,7 @@ import java.util.List;
 import boofcv.abst.feature.associate.AssociateDescription;
 import boofcv.abst.feature.associate.ScoreAssociation;
 import boofcv.abst.feature.detdesc.DetectDescribePoint;
-import boofcv.alg.feature.UtilFeature;
+import boofcv.alg.descriptor.UtilFeature;
 import boofcv.android.ConvertBitmap;
 import boofcv.android.gui.VideoRenderProcessing;
 import boofcv.factory.feature.associate.FactoryAssociation;
