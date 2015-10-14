@@ -53,7 +53,7 @@ public class MainActivity extends VideoDisplayActivity {
   //      setProcessing(new HomographyProcessing2(this,s.width,s.height));
      //   setProcessing(new CSVProcessing(this,s.width,s.height));
        // setProcessing(new RoomTagProcessing(this,s.width,s.height));
-        setProcessing(new ColouredAugmentProcessing(this,s.width,s.height));
+        setProcessing(new ColouredTrackingProcessing(this,s.width,s.height));
         return mCamera;
     }
 
