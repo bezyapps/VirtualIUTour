@@ -1,5 +1,7 @@
 package com.rea.learn;
 
+import android.util.Log;
+
 import boofcv.abst.feature.tracker.PointTrack;
 import boofcv.abst.feature.tracker.PointTrackerKltPyramid;
 import boofcv.abst.filter.derivative.ImageGradient;
@@ -85,6 +87,56 @@ public class VirtualTourPointTracker<I extends ImageSingleBand,D extends ImageSi
     }
 */
 
+
+    public void spawnTracks(QueueCorner found ) {
+        spawned.clear();
+
+        // used to convert it from the scale of the bottom layer into the original image
+        float scaleBottom = (float) basePyramid.getScale(0);
+
+        /*// exclude active tracks
+        excludeList.reset();
+        for (int i = 0; i < active.size(); i++) {
+            PyramidKltFeature f = (PyramidKltFeature) active.get(i);
+            excludeList.add((int) (f.x / scaleBottom), (int) (f.y / scaleBottom));
+        }*/
+
+
+
+        // extract the features
+
+
+        // grow the number of tracks if needed
+        while( unused.size() < found.size() )
+            addTrackToUnused();
+
+        for (int i = 0; i < found.size() && !unused.isEmpty(); i++) {
+            Point2D_I16 pt = found.get(i);
+
+            // set up pyramid description
+            PyramidKltFeature t = (PyramidKltFeature) unused.remove(unused.size() - 1);
+            t.x = pt.x * scaleBottom;
+            t.y = pt.y * scaleBottom;
+
+            tracker.setDescription(t);
+
+            // set up point description
+            PointTrack p = t.getCookie();
+            p.set(t.x,t.y);
+
+            if( checkValidSpawn(p) ) {
+                p.featureId = totalFeatures++;
+
+                // add to appropriate lists
+                active.add(t);
+                spawned.add(t);
+            } else {
+                unused.add(t);
+            }
+        }
+    }
+
+
     @Override
     public void spawnTracks() {
         spawned.clear();
@@ -102,6 +154,11 @@ public class VirtualTourPointTracker<I extends ImageSingleBand,D extends ImageSi
 
 
         // extract the features
+
+        Log.e("VIU: Unused:" , String.valueOf(unused.size()));
+        Log.e("VIU: Active:" , String.valueOf(active.size()));
+        Log.e("VIU: Spawned:" , String.valueOf(spawned.size()));
+        Log.e("VIU: Dropped:" , String.valueOf(dropped.size()));
 
 
         // grow the number of tracks if needed

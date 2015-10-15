@@ -141,7 +141,7 @@ public class ColouredTrackingProcessing<Desc extends TupleDesc> extends VideoRen
             Log.e("VIU: All Tracks", String.valueOf(virtualTourPointTracker.getAllTracks(null).size()));
             Log.e("VIU: New Tracks", String.valueOf(virtualTourPointTracker.getDroppedTracks(null).size()));
 
-            if(initDone) {
+            if(initDone && trackLost) {
                 for (Object o : virtualTourPointTracker.getNewTracks(null)) {
                     PointTrack p = (PointTrack) o;
                     canvas.drawPoint(
@@ -181,8 +181,9 @@ public class ColouredTrackingProcessing<Desc extends TupleDesc> extends VideoRen
         }
         synchronized (new Object()) {
             ImageFloat32 gray = new ImageFloat32(imageFloat32MultiSpectral.width,imageFloat32MultiSpectral.height);
+            ConvertImage.average(imageFloat32MultiSpectral, gray);
+            virtualTourPointTracker.process(gray);
             if(trackLost) {
-                ConvertImage.average(imageFloat32MultiSpectral, gray);
                 detDesc.detect(gray);
                 describeImage(listDst,locationDst);
                 associate.setDestination(listDst);
@@ -200,9 +201,8 @@ public class ColouredTrackingProcessing<Desc extends TupleDesc> extends VideoRen
                 }
                 initDone = false;
             }
-            virtualTourPointTracker.process(gray);
-            if( virtualTourPointTracker.getActiveTracks(null).size() < 130 )
-                virtualTourPointTracker.spawnTracks();
+          //  if( virtualTourPointTracker.getActiveTracks(null).size() < 130 )
+            //    virtualTourPointTracker.spawnTracks();
             if(virtualTourPointTracker.getActiveTracks(null).size() == 0) {
                     trackLost = true;
                 int size = virtualTourPointTracker.found.size();
