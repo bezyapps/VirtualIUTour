@@ -6,12 +6,15 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Point;
 import android.graphics.Typeface;
 import android.media.Image;
 import android.util.Log;
 import org.ddogleg.struct.FastQueue;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Vector;
+
 import boofcv.abst.feature.associate.AssociateDescription;
 import boofcv.abst.feature.associate.ScoreAssociation;
 import boofcv.abst.feature.detdesc.DetectDescribePoint;
@@ -64,6 +67,7 @@ public class ColouredTrackingProcessing<Desc extends TupleDesc> extends VideoRen
     FastQueue<Point2D_F64> locationCalSrc = new FastQueue<Point2D_F64>(Point2D_F64.class,true);
     FastQueue<Point2D_F64> locationSrc = new FastQueue<Point2D_F64>(Point2D_F64.class,true);
     FastQueue<Point2D_F64> locationDst = new FastQueue<Point2D_F64>(Point2D_F64.class,true);
+    Vector<Point> points = new Vector<Point>();
     // output image which is displayed by the GUI
     private Bitmap outputGUI;
     // storage used during image convert
@@ -136,6 +140,8 @@ public class ColouredTrackingProcessing<Desc extends TupleDesc> extends VideoRen
             paint3.setStrokeWidth(5);
             paint2.setTextSize(20);
 
+            points.clear();
+
             Log.e("VIU: Active Tracks", String.valueOf(virtualTourPointTracker.getActiveTracks(null).size()));
             Log.e("VIU: InActive Tracks", String.valueOf(virtualTourPointTracker.getInactiveTracks(null).size()));
             Log.e("VIU: All Tracks", String.valueOf(virtualTourPointTracker.getAllTracks(null).size()));
@@ -149,13 +155,23 @@ public class ColouredTrackingProcessing<Desc extends TupleDesc> extends VideoRen
                 }
             }
             else {
+
+                float avg_X = 0;
+                float avg_Y = 0;
+                int count = 0;
                 for (Object o : virtualTourPointTracker.getActiveTracks(null)) {
                     PointTrack p = (PointTrack) o;
-                    int red = (int) (2.5 * (p.featureId % 100));
-                    int green = (int) ((255.0 / 150.0) * (p.featureId % 150));
-                    int blue = (int) (p.featureId % 255);
-                    canvas.drawPoint((int) p.x, (int) p.y, paint2);
+                    avg_X = (float) (avg_X + p.getX());
+                    avg_Y = (float) (avg_Y + p.getY());
+                    count++;
+                    //int red = (int) (2.5 * (p.featureId % 100));
+                    //int green = (int) ((255.0 / 150.0) * (p.featureId % 150));
+                    //int blue = (int) (p.featureId % 255);
                 }
+                avg_X = avg_X / count;
+                avg_Y = avg_Y / count;
+                canvas.drawCircle(avg_X,avg_Y,10,paint3);
+                points.add(new Point((int)((avg_X * 2) + 160),(int)((avg_Y * 2) + 50)));
                 if(virtualTourPointTracker.getActiveTracks(null).size() > 0)
                 {
                     initDone = true;

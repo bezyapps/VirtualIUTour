@@ -2,26 +2,29 @@ package com.rea.learn;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.graphics.Point;
 import android.hardware.Camera;
 import android.text.Html;
 import android.util.Log;
+import android.view.Display;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
+import android.view.View;
 import android.view.WindowManager;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import java.lang.reflect.Field;
 import java.util.List;
 
+import boofcv.android.gui.CameraPreview;
 import boofcv.android.gui.VideoDisplayActivity;
 
 
 public class MainActivity extends VideoDisplayActivity {
-//Ammar Here
-    ///Eric
-//Rfayhereaaa
 
-
-    //again rafay
+    ColouredTrackingProcessing colouredTrackingProcessing;
     @Override
     protected void onResume() {
         super.onResume();
@@ -38,6 +41,7 @@ public class MainActivity extends VideoDisplayActivity {
         Camera.Size s = sizes.get(closest(sizes,320,240));
         this.s = s;
         param.setPreviewSize(s.width,s.height);
+        Log.e("ERBL", s.width + " , " + s.height);
         mCamera.setParameters(param);
 
         ////// This is the line where we set how the app will process the frames. We have defined
@@ -53,7 +57,11 @@ public class MainActivity extends VideoDisplayActivity {
   //      setProcessing(new HomographyProcessing2(this,s.width,s.height));
      //   setProcessing(new CSVProcessing(this,s.width,s.height));
        // setProcessing(new RoomTagProcessing(this,s.width,s.height));
-        setProcessing(new ColouredTrackingProcessing(this,s.width,s.height));
+
+
+        colouredTrackingProcessing = new ColouredTrackingProcessing(this,s.width,s.height);
+
+        setProcessing(colouredTrackingProcessing);
         return mCamera;
     }
 
@@ -101,7 +109,7 @@ public class MainActivity extends VideoDisplayActivity {
                 setProcessing(new TwoObjectProcessing(this, s.width, s.height));
                 break;
             case R.id.action_csv:
-                setProcessing(new CSVProcessing(this,s.width,s.height));
+                setProcessing(new CSVProcessing(this, s.width, s.height));
                 break;
         }
         return true;
@@ -111,7 +119,7 @@ public class MainActivity extends VideoDisplayActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         int test = item.getItemId();
         String title = item.getTitle().toString();
-        Log.e("TEST " , test + title);
+        Log.e("TEST ", test + title);
         switch (item.getItemId())
         {
             case R.id.action_one_object:
@@ -161,5 +169,39 @@ public class MainActivity extends VideoDisplayActivity {
         }
 
         return best;
+    }
+
+
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+      //
+
+
+            View v = getViewPreview().getChildAt(0);
+            Log.e("BEZY", "Child:  " +  0 + " ; " + v.getHeight() + " , " + v.getWidth() + " , " + v.getX() + " , "  +v.getY());
+            CameraPreview cameraPreview = (CameraPreview) v;
+            for(int i = 0 ; i < cameraPreview.getChildCount() ; i++)
+            {
+                 v = cameraPreview.getChildAt(i);
+                Log.e("BEZYS", "Child:  " +  i + " ; " + v.getHeight() + " , " + v.getWidth() + " , " + v.getX() + " , "  +v.getY());
+            }
+        Display display = getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        display.getHeight();
+        Log.e("ERBL", display.getHeight() + " , " + display.getWidth());
+      //  int width = size.x;
+       // int height = size.y;
+        for(Object p: colouredTrackingProcessing.points)
+        {   Point point = (Point) p;
+            float diff_X = Math.abs(point.x - event.getX());
+            float diff_Y = Math.abs(point.y - event.getY());
+            Log.e("ERBL", point.y + " , " + event.getY());
+            if(diff_X <= 20 && diff_Y <= 20)
+            {
+                Toast.makeText(this,"Test",Toast.LENGTH_SHORT).show();
+            }
+        }
+        return true;
     }
 }
