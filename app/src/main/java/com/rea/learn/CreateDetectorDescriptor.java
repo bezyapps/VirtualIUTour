@@ -139,7 +139,7 @@ public class CreateDetectorDescriptor {
 		ConfigFastHessian conf = new ConfigFastHessian();
 		conf.initialSampleSize = 2;
 		conf.extractRadius = 2;
-        conf.detectThreshold = 250;
+        conf.detectThreshold = 220;
 		conf.maxFeaturesPerScale = 120;
 		return conf;
 	}

@@ -24,6 +24,8 @@ import boofcv.android.gui.VideoDisplayActivity;
 
 public class MainActivity extends VideoDisplayActivity {
 
+
+    boolean change = false;
     ColouredTrackingProcessing colouredTrackingProcessing;
     @Override
     protected void onResume() {
@@ -61,7 +63,7 @@ public class MainActivity extends VideoDisplayActivity {
 
         colouredTrackingProcessing = new ColouredTrackingProcessing(this,s.width,s.height);
 
-        setProcessing(colouredTrackingProcessing);
+        setProcessing(new RoomTagProcessing2(this,s.width,s.height));
         return mCamera;
     }
 
@@ -172,6 +174,21 @@ public class MainActivity extends VideoDisplayActivity {
     }
 
 
+    @Override
+    public void onBackPressed() {
+
+        if(change)
+        {
+            setProcessing(new RoomTagProcessing2(this,s.width,s.height));
+        }
+        else
+        {
+            colouredTrackingProcessing = new ColouredTrackingProcessing(this,s.width,s.height);
+            setProcessing(colouredTrackingProcessing);
+        }
+
+        change = !change;
+    }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
