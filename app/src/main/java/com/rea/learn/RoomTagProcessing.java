@@ -34,12 +34,14 @@ public class RoomTagProcessing <Desc extends TupleDesc> extends VideoRenderProce
     DetectDescribePoint<ImageFloat32,Desc> detDesc;
     AssociateDescription<Desc> associate;
 
-    FastQueue<Desc> listSrc;
-    FastQueue<Desc> listCalSrc;
+    FastQueue<Desc> list304Src;
+    FastQueue<Desc> list303Src;
     FastQueue<Desc> listDst;
-    FastQueue<Point2D_F64> locationCalSrc = new FastQueue<Point2D_F64>(Point2D_F64.class,true);
+    FastQueue<Point2D_F64> location303Src = new FastQueue<>(Point2D_F64.class,true);
+    FastQueue<Point2D_F64> location304Src = new FastQueue<Point2D_F64>(Point2D_F64.class,true);
     FastQueue<Point2D_F64> locationSrc = new FastQueue<Point2D_F64>(Point2D_F64.class,true);
     FastQueue<Point2D_F64> locationDst = new FastQueue<Point2D_F64>(Point2D_F64.class,true);
+    List<Point2D_F64> points303Dst = new ArrayList<Point2D_F64>();
     // output image which is displayed by the GUI
     private Bitmap outputGUI;
     // storage used during image convert
@@ -62,7 +64,8 @@ public class RoomTagProcessing <Desc extends TupleDesc> extends VideoRenderProce
         //        ScoreAssociation score = FactoryAssociation.defaultScore(detDesc.getDescriptionType());
         ///   associate = FactoryAssociation.greedy(score,Double.MAX_VALUE,true);
 
-        listSrc = UtilFeature.createQueue(detDesc, 10);
+        list303Src = UtilFeature.createQueue(detDesc, 10);
+        list304Src = UtilFeature.createQueue(detDesc, 10);
         listDst = UtilFeature.createQueue(detDesc,10);
 
         // ScoreAssociation score = FactoryAssociation.scoreEuclidean(TupleDesc.class,true);
@@ -92,7 +95,7 @@ public class RoomTagProcessing <Desc extends TupleDesc> extends VideoRenderProce
 
         ///// We read the object image from resources. If you want to try you own image, then put a image in the
         ///// res/drawable folder with the name of 'camera_image.jpg' because that is the image we get here
-        Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.room_204);
+        Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.room_e_304);
         ImageFloat32 imageFloat32 = new ImageFloat32(bitmap.getWidth(),bitmap.getHeight());
         byte[] storage = null;
         ConvertBitmap.declareStorage(bitmap, storage);
@@ -104,13 +107,24 @@ public class RoomTagProcessing <Desc extends TupleDesc> extends VideoRenderProce
         //// it feature whenever a new feature is received. Hence saving computation.
         //ok
         detDesc.detect(imageFloat32);
-        describeImage(listSrc, locationSrc);
-        associate.setSource(listSrc);
+        describeImage(list304Src, location304Src);
+
+        bitmap.recycle();
+        bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.room_e_303);
+        imageFloat32 = new ImageFloat32(bitmap.getWidth(),bitmap.getHeight());
+        storage = null;
+        ConvertBitmap.declareStorage(bitmap, storage);
+        ConvertBitmap.bitmapToGray(bitmap, imageFloat32, storage);
+        detDesc.detect(imageFloat32);
+        describeImage(list303Src, location303Src);
+
+        Log.e("ERBL CAL: ", String.valueOf(list303Src.size()));
+
 
         output = Bitmap.createBitmap(width,height,Bitmap.Config.ARGB_8888 );
         outputGUI = Bitmap.createBitmap(width,height,Bitmap.Config.ARGB_8888 );
-        paint.setColor(Color.BLUE);
-        paint.setTextSize(20);
+       /* paint.setColor(Color.BLUE);
+        paint.setTextSize(20);*/
 
     }
 
@@ -122,7 +136,8 @@ public class RoomTagProcessing <Desc extends TupleDesc> extends VideoRenderProce
         /// This is the callback in which each frame is received. Processing is done in same way
         /// as in constructor
         detDesc.detect(gray);
-        describeImage(listDst,locationDst);
+        describeImage(listDst, locationDst);
+        associate.setSource(list304Src);
         associate.setDestination(listDst);
         associate.associate();
         synchronized (new Object()) {
@@ -139,8 +154,20 @@ public class RoomTagProcessing <Desc extends TupleDesc> extends VideoRenderProce
             for( int i = 0; i < matches.size; i++ ) {
                 AssociatedIndex m = matches.get(i);
                 //   m.
-                pointsSrc.add(locationSrc.get(m.src));
+                pointsSrc.add(location304Src.get(m.src));
                 pointsDst.add(locationDst.get(m.dst));
+            }
+        }
+        associate.setSource(list303Src);
+        associate.associate();
+        synchronized (new Object())
+        {
+            points303Dst.clear();
+
+            FastQueue<AssociatedIndex> matches = associate.getMatches();
+            for( int i = 0; i < matches.size; i++ ) {
+                AssociatedIndex m = matches.get(i);
+                points303Dst.add(locationDst.get(m.dst));
             }
         }
     }
@@ -206,7 +233,27 @@ public class RoomTagProcessing <Desc extends TupleDesc> extends VideoRenderProce
 */
 
     @Override
+
     protected void render(Canvas canvas, double imageToOutput) {
+        synchronized (new Object())
+        {
+            canvas.drawBitmap(outputGUI, 0, 0, null);
+            paint.setColor(Color.BLUE);
+            for(int i = 0; i < pointsDst.size(); i++) {
+                Point2D_F64 point2D_f64 = pointsDst.get(i);
+                canvas.drawCircle(Float.parseFloat(String.valueOf(point2D_f64.getX())),Float.parseFloat(String.valueOf(point2D_f64.getY())),2,paint);
+            }
+            paint.setColor(Color.RED);
+            for(int i = 0; i < points303Dst.size(); i++) {
+                Point2D_F64 point2D_f64 = points303Dst.get(i);
+                canvas.drawCircle(Float.parseFloat(String.valueOf(point2D_f64.getX())),Float.parseFloat(String.valueOf(point2D_f64.getY())),2,paint);
+            }
+            Log.e("Features_Card", String.valueOf(pointsDst.size()));
+            Log.e("Features_Cal", String.valueOf(points303Dst.size()));
+
+        }
+    }
+   /* protected void render(Canvas canvas, double imageToOutput) {
         synchronized (new Object())
         {
             canvas.drawBitmap(outputGUI, 0, 0, null);
@@ -220,9 +267,23 @@ public class RoomTagProcessing <Desc extends TupleDesc> extends VideoRenderProce
             canvas.drawText("Features: " + pointsDst.size(), 50, 10, p);
             Log.e("Features_D", String.valueOf(pointsDst.size()));
             Log.e("Features_S", String.valueOf(pointsSrc.size()));
+            //303
+
+            canvas.drawBitmap(outputGUI, 0, 0, null);
+            paint.setColor(Color.MAGENTA);
+            for(int i = 0; i < pointsDst.size(); i++) {
+                Point2D_F64 point2D_f64 = pointsDst.get(i);
+                canvas.drawCircle(Float.parseFloat(String.valueOf(point2D_f64.getX())),Float.parseFloat(String.valueOf(point2D_f64.getY())),2,paint);
+            }
+            Paint p2 = new Paint();
+            p.setColor(Color.RED);
+            p.setTextSize(15);
+            canvas.drawText("Features: " + pointsDst.size(), 50, 10, p2);
+            Log.e("Features_D", String.valueOf(points303Dst.size()));
+           // Log.e("Features_S", String.valueOf(points303Src.size()));
 
         }
-    }
+    }*/
     private void describeImage(FastQueue<Desc> listDesc, FastQueue<Point2D_F64> listLoc) {
         listDesc.reset();
         listLoc.reset();
