@@ -63,7 +63,7 @@ public class MainActivity extends VideoDisplayActivity {
 
         colouredTrackingProcessing = new ColouredTrackingProcessing(this,s.width,s.height);
 
-        setProcessing(new RoomTagProcessing2(this,s.width,s.height));
+        setProcessing(new WekaProcessing(this,s.width,s.height));
         return mCamera;
     }
 
@@ -177,7 +177,7 @@ public class MainActivity extends VideoDisplayActivity {
     @Override
     public void onBackPressed() {
 
-        if(change)
+      /*  if(change)
         {
             setProcessing(new RoomTagProcessing2(this,s.width,s.height));
         }
@@ -187,9 +187,10 @@ public class MainActivity extends VideoDisplayActivity {
             setProcessing(colouredTrackingProcessing);
         }
 
-        change = !change;
+        change = !change;*/
+        super.onBackPressed();
     }
-
+/*
     @Override
     public boolean onTouchEvent(MotionEvent event) {
       //
@@ -220,5 +221,5 @@ public class MainActivity extends VideoDisplayActivity {
             }
         }
         return true;
-    }
+    }*/
 }
