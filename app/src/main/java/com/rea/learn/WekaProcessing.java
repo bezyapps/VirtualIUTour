@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import boofcv.abst.feature.associate.AssociateDescription;
@@ -28,7 +29,7 @@ import boofcv.core.image.ConvertImage;
 import boofcv.factory.feature.associate.FactoryAssociation;
 import boofcv.struct.feature.AssociatedIndex;
 import boofcv.struct.feature.TupleDesc;
-import boofcv.struct.image.ImageFloat32;
+import boofcv.struct.image.ImageUInt8;
 import boofcv.struct.image.ImageType;
 import boofcv.struct.image.MultiSpectral;
 import georegression.struct.point.Point2D_F64;
@@ -50,9 +51,9 @@ import weka.core.converters.ConverterUtils;
  *         Jira Ticket: NULL
  * @since 04 November, 2015
  */
-public class WekaProcessing<Desc extends TupleDesc> extends VideoRenderProcessing<MultiSpectral<ImageFloat32>> {
+public class WekaProcessing<Desc extends TupleDesc> extends VideoRenderProcessing<MultiSpectral<ImageUInt8>> {
 
-    DetectDescribePoint<ImageFloat32, Desc> detDesc;
+    DetectDescribePoint<ImageUInt8, Desc> detDesc;
     StringBuilder headBuilder;
     FastQueue<Desc> listDst;
     FastQueue<Point2D_F64> locationDst = new FastQueue<Point2D_F64>(Point2D_F64.class, true);
@@ -66,6 +67,9 @@ public class WekaProcessing<Desc extends TupleDesc> extends VideoRenderProcessin
     private int width, height;
     private VotedPerceptron votedPerceptron;
     Context context;
+
+    String[] tags = {"E - 303" , "E - 304"};
+    int[] tag_count = {0,0};
 
     Paint paint = new Paint();
 
@@ -98,8 +102,8 @@ public class WekaProcessing<Desc extends TupleDesc> extends VideoRenderProcessin
     }
 
     public WekaProcessing(Context context, int width, int height) {
-        super(ImageType.ms(3, ImageFloat32.class));
-        detDesc = CreateDetectorDescriptor.create(CreateDetectorDescriptor.DETECT_FH, CreateDetectorDescriptor.DESC_SURF, ImageFloat32.class);
+        super(ImageType.ms(3, ImageUInt8.class));
+        detDesc = CreateDetectorDescriptor.create(CreateDetectorDescriptor.DETECT_FH, CreateDetectorDescriptor.DESC_SURF, ImageUInt8.class);
         this.width = width;
         this.height = height;
         listDst = UtilFeature.createQueue(detDesc, 10);
@@ -126,29 +130,48 @@ public class WekaProcessing<Desc extends TupleDesc> extends VideoRenderProcessin
         return true;
     }
 
+ //   volatile int feature_count = 0;
+ ConverterUtils.DataSource source;
+    Instances data;
+    StringBuilder dataBuilder;
     @Override
-    protected void process(MultiSpectral<ImageFloat32> imageFloat32MultiSpectral) {
-        ImageFloat32 gray = new ImageFloat32(imageFloat32MultiSpectral.width, imageFloat32MultiSpectral.height);
-        ConvertImage.average(imageFloat32MultiSpectral, gray);
+    protected void process(MultiSpectral<ImageUInt8> ImageUInt8MultiSpectral) {
+        ImageUInt8 gray = new ImageUInt8(ImageUInt8MultiSpectral.width, ImageUInt8MultiSpectral.height);
+        ConvertImage.average(ImageUInt8MultiSpectral, gray);
         detDesc.detect(gray);
         describeImage(listDst, locationDst);
-        StringBuilder dataBuilder = new StringBuilder(getARFF_Header());
+
+        synchronized ( lockGui ) {
+            //ConvertBitmap.declareStorage(gray ,storage);
+            ConvertBitmap.multiToBitmap(ImageUInt8MultiSpectral, output, storage);
+            //  ConvertBitmap.grayToBitmap(gray, output, storage);
+            outputGUI = output;
+        }
+
+        System.out.println("Model Start: " + System.currentTimeMillis());
+        dataBuilder = new StringBuilder(getARFF_Header());
+
         for(Desc element : listDst.data)
         {
             for(int i = 0; i < element.size() ; i++)
             {
                 if(allzeros(element)) continue;
                 dataBuilder.append(element.getDouble(i) + "," );
-                if(i == element.size() - 1) dataBuilder.append("?\n");
+                if(i == element.size() - 1) { //
+                    dataBuilder.append("?\n");
+
+                }
             }
         }
-        ConverterUtils.DataSource source = new ConverterUtils.DataSource(new ByteArrayInputStream(dataBuilder.toString().getBytes()));
-        Instances data = null;
+        source = new ConverterUtils.DataSource(new ByteArrayInputStream(dataBuilder.toString().getBytes()));
+        data = null;
         try {
             data = source.getDataSet();
         } catch (Exception e) {
             e.printStackTrace();
         }
+        int[] tag_count = {0,0};
+        this.tag_count = tag_count;
         data.setClassIndex(data.numAttributes() - 1);
         int e303 = 0; int e304 = 0;
         for(int i = 0; i < data.numInstances() ; i++ )
@@ -157,64 +180,45 @@ public class WekaProcessing<Desc extends TupleDesc> extends VideoRenderProcessin
             int in = -1;
             try {
                 in = (int)votedPerceptron.classifyInstance(ins);
+                this.tag_count[in]++;
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            switch(in)
-            {
-                case 0:
-                {
-                    e303++;
-                    break;
-                }
-                case 1:
-                {
-                    e304++;
-                    break;
-                }
-            }
         }
-        System.out.println("E303:" + e303);
-        System.out.println("E304:" + e304);
-        synchronized (new Object()) {
-            //ConvertBitmap.declareStorage(gray ,storage);
-            ConvertBitmap.multiToBitmap(imageFloat32MultiSpectral, output, storage);
-            //  ConvertBitmap.grayToBitmap(gray, output, storage);
-            outputGUI = output;
-        }
+        System.out.println("Model End: " + System.currentTimeMillis());
+
+       // System.out.println("Features Count:" + feature_count);
+        System.out.println("E303:" + tag_count[0]);
+        System.out.println("E304:" + tag_count[1]);
+
     }
 
 
     @Override
     protected void render(Canvas canvas, double imageToOutput) {
-        synchronized (new Object()) {
+        System.out.println("Render Start: " + System.currentTimeMillis());
+       int total = 100;
+        synchronized ( lockGui ) {
             canvas.drawBitmap(outputGUI, 0, 0, null);
-  /*          paint.setColor(Color.BLUE);
-            for (int i = 0; i < pointsDst.size(); i++) {
-                Point2D_F64 point2D_f64 = pointsDst.get(i);
-                canvas.drawCircle(Float.parseFloat(String.valueOf(point2D_f64.getX())), Float.parseFloat(String.valueOf(point2D_f64.getY())), 2, paint);
-            }
-            paint.setColor(Color.RED);
-            for (int i = 0; i < points303Dst.size(); i++) {
-                Point2D_F64 point2D_f64 = points303Dst.get(i);
-                canvas.drawCircle(Float.parseFloat(String.valueOf(point2D_f64.getX())), Float.parseFloat(String.valueOf(point2D_f64.getY())), 2, paint);
-            }
-*/
-
-          /*  if (points303Dst.size() > pointsDst.size()) {
-                canvas.drawText("Room 303", 100, 100, paint);
-            } else if (points303Dst.size() < pointsDst.size()) {
-                canvas.drawText("Room 304", 100, 100, paint);
-            }*/
-
-
         }
+            int largest = 0;
+            for(int i = 0; i < tag_count.length; i++)
+            {
+                if(tag_count[i] > largest)
+                {
+                    largest = i;
+                }
+            }
+            int should_be_atleast = (int) Math.ceil(total / tags.length);
+            System.out.println("Should be atleast: " + should_be_atleast);
+            if(tag_count[largest] >= should_be_atleast  ) canvas.drawText(tags[largest], 100, 100, paint);
     }
 
     private void describeImage(FastQueue<Desc> listDesc, FastQueue<Point2D_F64> listLoc) {
         listDesc.reset();
         listLoc.reset();
         int N = detDesc.getNumberOfFeatures();
+   //     feature_count = N;
         for (int i = 0; i < N; i++) {
             listLoc.grow().set(detDesc.getLocation(i));
             listDesc.grow().setTo(detDesc.getDescription(i));
