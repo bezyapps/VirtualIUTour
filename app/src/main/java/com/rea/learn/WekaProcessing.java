@@ -40,14 +40,14 @@ import weka.core.converters.ConverterUtils;
 
 /**
  * Created by ericbhatti on 11/4/15.
- * <p>
- * <p>
+ * <p/>
+ * <p/>
  * <p/> Class Description:
  *
  * @author Eric Bhatti
- *         <p>
+ *         <p/>
  *         Company Name: Arpatech (http://arpatech.com/)
- *         <p>
+ *         <p/>
  *         Jira Ticket: NULL
  * @since 04 November, 2015
  */
@@ -68,14 +68,14 @@ public class WekaProcessing<Desc extends TupleDesc> extends VideoRenderProcessin
     private VotedPerceptron votedPerceptron;
     Context context;
 
-    String[] tags = {"E - 303" , "E - 304"};
-    int[] tag_count = {0,0};
+    String[] tags = {"E - 303", "E - 304"};
+    int[] tag_count = {0, 0};
 
     Paint paint = new Paint();
 
-    private void buildHeader(){
+    private void buildHeader() {
         headBuilder = new StringBuilder("@relation test_set\n\n");
-        for(int i = 1 ; i < 65 ; i++) {
+        for (int i = 1; i < 65; i++) {
             headBuilder.append("@attribute data_" + i + " numeric\n");
         }
         headBuilder.append("@attribute class {e303,e304}\n\n");
@@ -86,8 +86,7 @@ public class WekaProcessing<Desc extends TupleDesc> extends VideoRenderProcessin
         return headBuilder.toString();
     }
 
-    private Object getModel(String modelName)
-    {
+    private Object getModel(String modelName) {
         try {
             AssetManager assetManager = context.getAssets();
             InputStream inputStream = assetManager.open(modelName);
@@ -117,23 +116,21 @@ public class WekaProcessing<Desc extends TupleDesc> extends VideoRenderProcessin
     }
 
 
-    private boolean allzeros(Desc desc)
-    {
+    private boolean allzeros(Desc desc) {
         boolean allzero = true;
-        for(int i  = 0; i <desc.size(); i++)
-        {
-            if(desc.getDouble(i) != 0)
-            {
+        for (int i = 0; i < desc.size(); i++) {
+            if (desc.getDouble(i) != 0) {
                 return false;
             }
         }
         return true;
     }
 
- //   volatile int feature_count = 0;
- ConverterUtils.DataSource source;
+    //   volatile int feature_count = 0;
+    ConverterUtils.DataSource source;
     Instances data;
     StringBuilder dataBuilder;
+
     @Override
     protected void process(MultiSpectral<ImageUInt8> ImageUInt8MultiSpectral) {
         ImageUInt8 gray = new ImageUInt8(ImageUInt8MultiSpectral.width, ImageUInt8MultiSpectral.height);
@@ -141,7 +138,7 @@ public class WekaProcessing<Desc extends TupleDesc> extends VideoRenderProcessin
         detDesc.detect(gray);
         describeImage(listDst, locationDst);
 
-        synchronized ( lockGui ) {
+        synchronized (lockGui) {
             //ConvertBitmap.declareStorage(gray ,storage);
             ConvertBitmap.multiToBitmap(ImageUInt8MultiSpectral, output, storage);
             //  ConvertBitmap.grayToBitmap(gray, output, storage);
@@ -151,18 +148,17 @@ public class WekaProcessing<Desc extends TupleDesc> extends VideoRenderProcessin
         System.out.println("Model Start: " + System.currentTimeMillis());
         dataBuilder = new StringBuilder(getARFF_Header());
 
-        for(Desc element : listDst.data)
-        {
-            for(int i = 0; i < element.size() ; i++)
-            {
-                if(allzeros(element)) continue;
-                dataBuilder.append(element.getDouble(i) + "," );
-                if(i == element.size() - 1) { //
+        for (Desc element : listDst.data) {
+            for (int i = 0; i < element.size(); i++) {
+                if (allzeros(element)) continue;
+                dataBuilder.append(element.getDouble(i) + ",");
+                if (i == element.size() - 1) { //
                     dataBuilder.append("?\n");
 
                 }
             }
         }
+        System.gc();
         source = new ConverterUtils.DataSource(new ByteArrayInputStream(dataBuilder.toString().getBytes()));
         data = null;
         try {
@@ -170,24 +166,24 @@ public class WekaProcessing<Desc extends TupleDesc> extends VideoRenderProcessin
         } catch (Exception e) {
             e.printStackTrace();
         }
-        int[] tag_count = {0,0};
+        int[] tag_count = {0, 0};
         this.tag_count = tag_count;
         data.setClassIndex(data.numAttributes() - 1);
         int e303 = 0; int e304 = 0;
-        for(int i = 0; i < data.numInstances() ; i++ )
-        {
+        for (int i = 0; i < data.numInstances(); i++) {
             Instance ins = data.instance(i);
             int in = -1;
             try {
-                in = (int)votedPerceptron.classifyInstance(ins);
+                in = (int) votedPerceptron.classifyInstance(ins);
                 this.tag_count[in]++;
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
+        System.gc();
         System.out.println("Model End: " + System.currentTimeMillis());
 
-       // System.out.println("Features Count:" + feature_count);
+        // System.out.println("Features Count:" + feature_count);
         System.out.println("E303:" + tag_count[0]);
         System.out.println("E304:" + tag_count[1]);
 
@@ -197,28 +193,28 @@ public class WekaProcessing<Desc extends TupleDesc> extends VideoRenderProcessin
     @Override
     protected void render(Canvas canvas, double imageToOutput) {
         System.out.println("Render Start: " + System.currentTimeMillis());
-       int total = 100;
-        synchronized ( lockGui ) {
+        int total = 100;
+        synchronized (lockGui) {
             canvas.drawBitmap(outputGUI, 0, 0, null);
         }
-            int largest = 0;
-            for(int i = 0; i < tag_count.length; i++)
-            {
-                if(tag_count[i] > largest)
-                {
-                    largest = i;
-                }
+        System.gc();
+        int largest = 0;
+        for (int i = 0; i < tag_count.length; i++) {
+            if (tag_count[i] > largest) {
+                largest = i;
             }
-            int should_be_atleast = (int) Math.ceil(total / tags.length);
-            System.out.println("Should be atleast: " + should_be_atleast);
-            if(tag_count[largest] >= should_be_atleast  ) canvas.drawText(tags[largest], 100, 100, paint);
+        }
+        int should_be_atleast = (int) Math.ceil(total / tags.length);
+        System.out.println("Should be atleast: " + should_be_atleast);
+        if (tag_count[largest] >= should_be_atleast) canvas.drawText(tags[largest], 100, 100, paint);
+        System.gc();
     }
 
     private void describeImage(FastQueue<Desc> listDesc, FastQueue<Point2D_F64> listLoc) {
         listDesc.reset();
         listLoc.reset();
         int N = detDesc.getNumberOfFeatures();
-   //     feature_count = N;
+        //     feature_count = N;
         for (int i = 0; i < N; i++) {
             listLoc.grow().set(detDesc.getLocation(i));
             listDesc.grow().setTo(detDesc.getDescription(i));
