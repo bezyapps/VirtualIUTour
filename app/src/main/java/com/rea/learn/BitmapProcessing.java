@@ -81,6 +81,18 @@ public class BitmapProcessing extends VideoRenderProcessing<MultiSpectral<ImageF
                      //   File file = new File(E)
                 }
 
+
+                /*
+                private String convert(byte[] data) throws Exception
+	{
+		BufferedImage bufferedImage = ImageIO.read(new ByteArrayInputStream(data));
+		ImageFloat32 float32 = new ImageFloat32();
+		ConvertBufferedImage.convertFrom(bufferedImage, float32);
+		return null;
+	}
+
+                 */
+
         }
 
 }
