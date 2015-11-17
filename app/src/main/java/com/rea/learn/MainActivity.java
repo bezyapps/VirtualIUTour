@@ -55,15 +55,15 @@ public class MainActivity extends VideoDisplayActivity {
         //// others are commented.
 
         ///// setProcessing(new GrayProcessing());
-        //// setProcessing(new ColorProcessing());
+       // setProcessing(new ColorProcessing());
   //      setProcessing(new HomographyProcessing2(this,s.width,s.height));
      //   setProcessing(new CSVProcessing(this,s.width,s.height));
        // setProcessing(new RoomTagProcessing(this,s.width,s.height));
 
 
-        colouredTrackingProcessing = new ColouredTrackingProcessing(this,s.width,s.height);
+       // colouredTrackingProcessing = new ColouredTrackingProcessing(this,s.width,s.height);
 
-        setProcessing(new WekaProcessing(this,s.width,s.height));
+       setProcessing(new BitmapProcessing(this,s.width,s.height));
         return mCamera;
     }
 

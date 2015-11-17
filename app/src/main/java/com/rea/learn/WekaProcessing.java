@@ -17,6 +17,7 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 
 import boofcv.abst.feature.associate.AssociateDescription;
@@ -33,7 +34,12 @@ import boofcv.struct.image.ImageUInt8;
 import boofcv.struct.image.ImageType;
 import boofcv.struct.image.MultiSpectral;
 import georegression.struct.point.Point2D_F64;
+import weka.classifiers.Evaluation;
+import weka.classifiers.bayes.BayesNet;
 import weka.classifiers.functions.VotedPerceptron;
+import weka.classifiers.rules.OneR;
+import weka.core.Attribute;
+import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.converters.ConverterUtils;
@@ -65,7 +71,7 @@ public class WekaProcessing<Desc extends TupleDesc> extends VideoRenderProcessin
     // output image which is modified by processing thread
     private Bitmap output;
     private int width, height;
-    private VotedPerceptron votedPerceptron;
+    private BayesNet bayesNet;
     Context context;
 
     String[] tags = {"E - 303", "E - 304"};
@@ -82,8 +88,8 @@ public class WekaProcessing<Desc extends TupleDesc> extends VideoRenderProcessin
         headBuilder.append("@data\n");
     }
 
-    private String getARFF_Header() {
-        return headBuilder.toString();
+    private StringBuilder getARFF_Header() {
+        return headBuilder;
     }
 
     private Object getModel(String modelName) {
@@ -108,7 +114,7 @@ public class WekaProcessing<Desc extends TupleDesc> extends VideoRenderProcessin
         listDst = UtilFeature.createQueue(detDesc, 10);
         this.context = context;
         buildHeader();
-        votedPerceptron = (VotedPerceptron) getModel("voted.model");
+        bayesNet = (BayesNet) getModel("bayesnet.model");
         output = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         outputGUI = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         paint.setColor(Color.BLUE);
@@ -127,12 +133,13 @@ public class WekaProcessing<Desc extends TupleDesc> extends VideoRenderProcessin
     }
 
     //   volatile int feature_count = 0;
-    ConverterUtils.DataSource source;
-    Instances data;
-    StringBuilder dataBuilder;
+
 
     @Override
     protected void process(MultiSpectral<ImageUInt8> ImageUInt8MultiSpectral) {
+        ConverterUtils.DataSource source;
+        Instances data;
+        StringBuilder dataBuilder;
         ImageUInt8 gray = new ImageUInt8(ImageUInt8MultiSpectral.width, ImageUInt8MultiSpectral.height);
         ConvertImage.average(ImageUInt8MultiSpectral, gray);
         detDesc.detect(gray);
@@ -145,7 +152,7 @@ public class WekaProcessing<Desc extends TupleDesc> extends VideoRenderProcessin
             outputGUI = output;
         }
 
-        System.out.println("Model Start: " + System.currentTimeMillis());
+
         dataBuilder = new StringBuilder(getARFF_Header());
 
         for (Desc element : listDst.data) {
@@ -158,30 +165,54 @@ public class WekaProcessing<Desc extends TupleDesc> extends VideoRenderProcessin
                 }
             }
         }
+
         System.gc();
-        source = new ConverterUtils.DataSource(new ByteArrayInputStream(dataBuilder.toString().getBytes()));
+
+        String model2Str = dataBuilder.toString();
+        byte[] bytes = model2Str.getBytes();
+
+
+        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);
+        source = new ConverterUtils.DataSource(byteArrayInputStream);
+
+        long start = System.currentTimeMillis();
         data = null;
         try {
             data = source.getDataSet();
         } catch (Exception e) {
             e.printStackTrace();
         }
+        long end = System.currentTimeMillis();
+        System.out.println("Model Time: " + String.valueOf(end - start));
         int[] tag_count = {0, 0};
         this.tag_count = tag_count;
         data.setClassIndex(data.numAttributes() - 1);
+    //    Instances instances =
         int e303 = 0; int e304 = 0;
+
         for (int i = 0; i < data.numInstances(); i++) {
             Instance ins = data.instance(i);
             int in = -1;
+          /*  Instance instance = new Instance(64);
+            Attribute attribute= new Attribute("data_1",0);
+            attribute.setWeight(1.0);
+            instance.setValue(attribute, Double.NaN);
+            Attribute attribute2= new Attribute("data_2",1);
+            attribute.setWeight(1.0);
+            instance.setValue(attribute2, 1.5);
+     //       Attribute attribute1 = new Attribute("class",)*/
             try {
-                in = (int) votedPerceptron.classifyInstance(ins);
-                this.tag_count[in]++;
+                Instance instance = createInstance();
+                int tem = (int) bayesNet.classifyInstance(instance);
+                in = (int) bayesNet.classifyInstance(ins);
+              //  this.tag_count[in]++;
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
+
         System.gc();
-        System.out.println("Model End: " + System.currentTimeMillis());
+
 
         // System.out.println("Features Count:" + feature_count);
         System.out.println("E303:" + tag_count[0]);
@@ -190,9 +221,21 @@ public class WekaProcessing<Desc extends TupleDesc> extends VideoRenderProcessin
     }
 
 
+    private Instance createInstance(){
+        Instance instance = new Instance(65);
+        for(int i = 0; i < 65; i++) {
+            Attribute attribute = new Attribute("data_"+(i+1), i);
+            attribute.setWeight(1.0);
+            instance.setValue(attribute, Math.random());
+        }
+        Attribute attribute = new Attribute("class", 64);
+        instance.setValue(attribute, Double.NaN);
+        return instance;
+        }
+
+
     @Override
     protected void render(Canvas canvas, double imageToOutput) {
-        System.out.println("Render Start: " + System.currentTimeMillis());
         int total = 100;
         synchronized (lockGui) {
             canvas.drawBitmap(outputGUI, 0, 0, null);
@@ -206,7 +249,8 @@ public class WekaProcessing<Desc extends TupleDesc> extends VideoRenderProcessin
         }
         int should_be_atleast = (int) Math.ceil(total / tags.length);
         System.out.println("Should be atleast: " + should_be_atleast);
-        if (tag_count[largest] >= should_be_atleast) canvas.drawText(tags[largest], 100, 100, paint);
+      //  if (tag_count[largest] >= should_be_atleast) canvas.drawText(tags[largest], 100, 100, paint);
+        canvas.drawText(tags[largest], 100, 100, paint);
         System.gc();
     }
 
