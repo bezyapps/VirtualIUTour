@@ -34,15 +34,7 @@ import boofcv.struct.image.ImageUInt8;
 import boofcv.struct.image.ImageType;
 import boofcv.struct.image.MultiSpectral;
 import georegression.struct.point.Point2D_F64;
-import weka.classifiers.Evaluation;
-import weka.classifiers.bayes.BayesNet;
-import weka.classifiers.functions.VotedPerceptron;
-import weka.classifiers.rules.OneR;
-import weka.core.Attribute;
-import weka.core.FastVector;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.converters.ConverterUtils;
+
 
 /**
  * Created by ericbhatti on 11/4/15.
@@ -58,6 +50,34 @@ import weka.core.converters.ConverterUtils;
  * @since 04 November, 2015
  */
 public class WekaProcessing<Desc extends TupleDesc> extends VideoRenderProcessing<MultiSpectral<ImageUInt8>> {
+    protected WekaProcessing(ImageType<MultiSpectral<ImageUInt8>> imageType) {
+        super(imageType);
+    }
+
+    /**
+     * <p>Image processing is done here and is invoked in its own thread, removing any hard time constraints. When modifying data structures that are read inside of
+     * {@link #render} be sure to use synchronize with {@link #lockGui} to avoid crashes or weird visual artifacts.  Use of lockGui should be minimized to ensure a fast
+     * and responsive GUI</p>
+     *
+     * @param gray
+     */
+    @Override
+    protected void process(MultiSpectral<ImageUInt8> gray) {
+
+    }
+
+    /**
+     * Results computed by {@link #process} are visualized here.  This function is called inside a synchronize(lockGui) block.  The provided canvas has been adjusted to
+     * be centered in the view and to account for the resolution difference of the preview image and the display.
+     *
+     * @param canvas        Canvas which is to be displayed.
+     * @param imageToOutput Scale factor from input image to output display.  Can also be accessed via {@link #getScale}
+     */
+    @Override
+    protected void render(Canvas canvas, double imageToOutput) {
+
+    }
+/*
 
     DetectDescribePoint<ImageUInt8, Desc> detDesc;
     StringBuilder headBuilder;
@@ -193,14 +213,16 @@ public class WekaProcessing<Desc extends TupleDesc> extends VideoRenderProcessin
         for (int i = 0; i < data.numInstances(); i++) {
             Instance ins = data.instance(i);
             int in = -1;
-          /*  Instance instance = new Instance(64);
+          */
+/*  Instance instance = new Instance(64);
             Attribute attribute= new Attribute("data_1",0);
             attribute.setWeight(1.0);
             instance.setValue(attribute, Double.NaN);
             Attribute attribute2= new Attribute("data_2",1);
             attribute.setWeight(1.0);
             instance.setValue(attribute2, 1.5);
-     //       Attribute attribute1 = new Attribute("class",)*/
+     //       Attribute attribute1 = new Attribute("class",)*//*
+
             try {
                 Instance instance = createInstance();
                 int tem = (int) bayesNet.classifyInstance(instance);
@@ -264,5 +286,6 @@ public class WekaProcessing<Desc extends TupleDesc> extends VideoRenderProcessin
             listDesc.grow().setTo(detDesc.getDescription(i));
         }
     }
+*/
 
 }

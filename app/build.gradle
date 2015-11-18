@@ -48,5 +48,5 @@ dependencies {
     compile 'com.opencsv:opencsv:3.5'
     /*compile 'org.boofcv:all:0.19'*/
     compile 'com.android.support:appcompat-v7:23.0.1'
-    compile 'nz.ac.waikato.cms.weka:weka-stable:3.6.13'
+   // compile 'nz.ac.waikato.cms.weka:weka-stable:3.6.13'
 }

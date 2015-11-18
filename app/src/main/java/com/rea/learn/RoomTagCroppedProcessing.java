@@ -127,6 +127,8 @@ public class RoomTagCroppedProcessing<Desc extends TupleDesc> extends VideoRende
     }
 
 
+
+
     @Override
     protected void process(MultiSpectral<ImageFloat32> imageFloat32MultiSpectral) {
         ImageFloat32 gray = new ImageFloat32(imageFloat32MultiSpectral.width,imageFloat32MultiSpectral.height);
