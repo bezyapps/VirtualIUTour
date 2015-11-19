@@ -2,6 +2,7 @@ package com.rea.learn;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Point;
 import android.hardware.Camera;
 import android.text.Html;
@@ -63,7 +64,14 @@ public class MainActivity extends VideoDisplayActivity {
 
        // colouredTrackingProcessing = new ColouredTrackingProcessing(this,s.width,s.height);
 
-       setProcessing(new BitmapProcessing(this,s.width,s.height));
+        Intent intent = getIntent();
+        if(intent.hasExtra(Settings.IP_ADDRESS) && intent.hasExtra(Settings.SKIP_RATE)){
+            setProcessing(new BitmapVariableProcessing(this,s.width,s.height,intent.getStringExtra(Settings.IP_ADDRESS).trim(),intent.getIntExtra(Settings.SKIP_RATE,7)));
+        }
+        else {
+            setProcessing(new BitmapVariableProcessing(this,s.width,s.height));
+        }
+
         return mCamera;
     }
 
