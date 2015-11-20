@@ -157,13 +157,16 @@ public class WekaProcessing<Desc extends TupleDesc> extends VideoRenderProcessin
 
     @Override
     protected void process(MultiSpectral<ImageUInt8> ImageUInt8MultiSpectral) {
+
         ConverterUtils.DataSource source;
         Instances data;
         StringBuilder dataBuilder;
+
         ImageUInt8 gray = new ImageUInt8(ImageUInt8MultiSpectral.width, ImageUInt8MultiSpectral.height);
         ConvertImage.average(ImageUInt8MultiSpectral, gray);
         detDesc.detect(gray);
         describeImage(listDst, locationDst);
+        long syn_start = System.currentTimeMillis();
 
         synchronized (lockGui) {
             //ConvertBitmap.declareStorage(gray ,storage);
@@ -172,6 +175,11 @@ public class WekaProcessing<Desc extends TupleDesc> extends VideoRenderProcessin
             outputGUI = output;
         }
 
+
+        long syn_end = System.currentTimeMillis();
+        Log.e("SYNC TIME" , String.valueOf(syn_end - syn_start));
+        long model_start = System.currentTimeMillis();
+        //System.out.println("Model Start: " + System.currentTimeMillis());
 
         dataBuilder = new StringBuilder(getARFF_Header());
 
@@ -239,8 +247,10 @@ public class WekaProcessing<Desc extends TupleDesc> extends VideoRenderProcessin
         // System.out.println("Features Count:" + feature_count);
         System.out.println("E303:" + tag_count[0]);
         System.out.println("E304:" + tag_count[1]);
-
+        long end = System.currentTimeMillis();
+        Log.e("TIME", String.valueOf(end - start));
     }
+
 
 
     private Instance createInstance(){
@@ -254,6 +264,8 @@ public class WekaProcessing<Desc extends TupleDesc> extends VideoRenderProcessin
         instance.setValue(attribute, Double.NaN);
         return instance;
         }
+
+
 
 
     @Override
