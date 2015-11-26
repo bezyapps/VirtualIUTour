@@ -27,6 +27,7 @@ import java.util.Map;
 
 import javax.net.ssl.HttpsURLConnection;
 
+import boofcv.alg.misc.ImageStatistics;
 import boofcv.android.ConvertBitmap;
 import boofcv.android.gui.VideoRenderProcessing;
 import boofcv.core.image.ConvertImage;
@@ -47,7 +48,7 @@ import boofcv.struct.image.MultiSpectral;
  *         Jira Ticket: NULL
  * @since 17 November, 2015
  */
-public class BitmapVariableProcessing extends VideoRenderProcessing<MultiSpectral<ImageFloat32>> {
+public class BitmapVariableHistoGramProcessing extends VideoRenderProcessing<MultiSpectral<ImageFloat32>> {
 
     // output image which is displayed by the GUI
     private Bitmap outputGUI;
@@ -69,7 +70,9 @@ public class BitmapVariableProcessing extends VideoRenderProcessing<MultiSpectra
 
     Paint paint;
 
-    public BitmapVariableProcessing(Context context, int width, int height) {
+    private ImageFloat32 lastServerImage;
+
+    public BitmapVariableHistoGramProcessing(Context context, int width, int height) {
         super(ImageType.ms(3, ImageFloat32.class));
         this.width = width;
         this.height = height;
@@ -80,7 +83,7 @@ public class BitmapVariableProcessing extends VideoRenderProcessing<MultiSpectra
         this.ipAddress = "http://192.168.11.252:8080/StrutsMavenProject/image.json";
         initPaint(Color.RED,17);
     }
-    public BitmapVariableProcessing(Context context, int width, int height,String ipAddress, int skipRate) {
+    public BitmapVariableHistoGramProcessing(Context context, int width, int height, String ipAddress, int skipRate) {
         super(ImageType.ms(3, ImageFloat32.class));
         this.width = width;
         this.height = height;
@@ -122,17 +125,32 @@ public class BitmapVariableProcessing extends VideoRenderProcessing<MultiSpectra
             //  ConvertBitmap.grayToBitmap(gray, output, storage);
             outputGUI = output;
         }
-        if(frameCount % skipRate == 0) {
-            ImageFloat32 gray = new ImageFloat32(imageFloat32MultiSpectral.width, imageFloat32MultiSpectral.height);
-            ConvertImage.average(imageFloat32MultiSpectral, gray);
-            ConvertBitmap.grayToBitmap(gray, grayBitmap, storage);
-            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-            grayBitmap.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream);
-            byte[] data = byteArrayOutputStream.toByteArray();
-            String img = Base64.encodeToString(data, Base64.DEFAULT);
-            GetLocationAsync getLocationAsync = new GetLocationAsync();
-            getLocationAsync.execute(img);
+        ImageFloat32 currentFrame = new ImageFloat32(imageFloat32MultiSpectral.width, imageFloat32MultiSpectral.height);
+        ConvertImage.average(imageFloat32MultiSpectral, currentFrame);
+        //if(frameCount % skipRate == 0) {
+        if(lastServerImage == null) {
+            postImageToServer(currentFrame,grayBitmap);
         }
+        else {
+            double error = ImageStatistics.meanDiffAbs(lastServerImage,currentFrame);
+            if(error > 35) {
+                Log.e("SERVER_ERROR" , String.valueOf(error));
+                postImageToServer(currentFrame,grayBitmap);
+            }
+        }
+    }
+
+
+    private void postImageToServer(ImageFloat32 currentFrame, Bitmap grayBitmap)
+    {
+        ConvertBitmap.grayToBitmap(currentFrame, grayBitmap, storage);
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        grayBitmap.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream);
+        byte[] data = byteArrayOutputStream.toByteArray();
+        String img = Base64.encodeToString(data, Base64.DEFAULT);
+        GetLocationAsync getLocationAsync = new GetLocationAsync();
+        getLocationAsync.execute(img);
+        lastServerImage = currentFrame;
     }
 
 

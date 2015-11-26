@@ -51,8 +51,8 @@ public class Settings extends AppCompatActivity {
                 android.R.layout.simple_dropdown_item_1line, IPs);
         editTextIP.setAdapter(adapter);
         numberPickerFrame.setMaxValue(20);
-        numberPickerFrame.setMinValue(5);
-        numberPickerFrame.setValue(7);
+        numberPickerFrame.setMinValue(7);
+        numberPickerFrame.setValue(10);
     }
 
 }
