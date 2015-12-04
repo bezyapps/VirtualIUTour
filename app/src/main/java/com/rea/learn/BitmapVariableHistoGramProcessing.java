@@ -64,6 +64,8 @@ public class BitmapVariableHistoGramProcessing extends VideoRenderProcessing<Mul
 
     int skipRate;
 
+    long lastServerTime;
+
     String ipAddress;
 
     String location = "";
@@ -91,7 +93,8 @@ public class BitmapVariableHistoGramProcessing extends VideoRenderProcessing<Mul
         outputGUI = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         grayBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         this.ipAddress = ipAddress;
-        this.skipRate = skipRate;
+        //this.skipRate = skipRate;
+        this.skipRate = skipRate * 1000;
         initPaint(Color.RED,17);
     }
 
@@ -133,9 +136,10 @@ public class BitmapVariableHistoGramProcessing extends VideoRenderProcessing<Mul
         }
         else {
             double error = ImageStatistics.meanDiffAbs(lastServerImage,currentFrame);
-            if(error > 35) {
-                Log.e("SERVER_ERROR" , String.valueOf(error));
-                postImageToServer(currentFrame,grayBitmap);
+            long lastPingDiff = System.currentTimeMillis() - lastServerTime;
+            if(error > 35 || lastPingDiff >= skipRate) {
+                Log.e("SERVER_ERROR" , "Error: " + String.valueOf(error) + "----- Server Time: " + lastPingDiff);
+                postImageToServer(currentFrame, grayBitmap);
             }
         }
     }
@@ -151,6 +155,7 @@ public class BitmapVariableHistoGramProcessing extends VideoRenderProcessing<Mul
         GetLocationAsync getLocationAsync = new GetLocationAsync();
         getLocationAsync.execute(img);
         lastServerImage = currentFrame;
+        lastServerTime = System.currentTimeMillis();
     }
 
 
