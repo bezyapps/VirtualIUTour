@@ -71,7 +71,7 @@ import boofcv.struct.image.MultiSpectral;
         this.width = width;
         this.mainActivity = context;
         this.height = height;
-        img_ar = BitmapFactory.decodeResource(context.getResources(),R.drawable.ar);
+        img_ar = BitmapFactory.decodeResource(context.getResources(),R.drawable.img_ar_2);
         output = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         outputGUI = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         grayBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
@@ -84,7 +84,7 @@ import boofcv.struct.image.MultiSpectral;
         this.width = width;
         this.mainActivity = context;
         this.height = height;
-        img_ar = BitmapFactory.decodeResource(context.getResources(),R.drawable.ar);
+        img_ar = BitmapFactory.decodeResource(context.getResources(),R.drawable.img_ar_2);
         output = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         outputGUI = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         grayBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
@@ -111,8 +111,8 @@ import boofcv.struct.image.MultiSpectral;
     protected void render(Canvas canvas, double imageToOutput) {
         synchronized (new Object()) {
             canvas.drawBitmap(outputGUI, 0, 0, null);
-            canvas.drawBitmap(img_ar,100,100,null);
-            canvas.drawText(location,75,75,paint);
+            canvas.drawBitmap(img_ar,75,75,null);
+            canvas.drawText(location,160,120,paint);
         }
     }
 
