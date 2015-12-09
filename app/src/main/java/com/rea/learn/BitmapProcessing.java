@@ -3,22 +3,21 @@ package com.rea.learn;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.os.AsyncTask;
-import android.os.Environment;
 import android.util.Base64;
 import android.util.Log;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -59,8 +58,10 @@ public class BitmapProcessing extends VideoRenderProcessing<MultiSpectral<ImageF
     private int width, height;
 
     private Bitmap grayBitmap;
-
+    Paint paint = new Paint();
     int frameCount = 0;
+
+    String location = "";
 
     public BitmapProcessing(Context context, int width, int height) {
         super(ImageType.ms(3, ImageFloat32.class));
@@ -69,6 +70,8 @@ public class BitmapProcessing extends VideoRenderProcessing<MultiSpectral<ImageF
         output = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         outputGUI = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         grayBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        paint.setColor(Color.GREEN);
+        paint.setTextSize(15);
     }
 
 
@@ -76,6 +79,7 @@ public class BitmapProcessing extends VideoRenderProcessing<MultiSpectral<ImageF
     protected void render(Canvas canvas, double imageToOutput) {
         synchronized (new Object()) {
             canvas.drawBitmap(outputGUI, 0, 0, null);
+            canvas.drawText(location,50,50,paint);
         }
     }
 
@@ -89,7 +93,7 @@ public class BitmapProcessing extends VideoRenderProcessing<MultiSpectral<ImageF
             //  ConvertBitmap.grayToBitmap(gray, output, storage);
             outputGUI = output;
         }
-        if(frameCount % 4 == 0) {
+        if(frameCount % 7 == 0) {
             ImageFloat32 gray = new ImageFloat32(imageFloat32MultiSpectral.width, imageFloat32MultiSpectral.height);
             ConvertImage.average(imageFloat32MultiSpectral, gray);
             ConvertBitmap.grayToBitmap(gray, grayBitmap, storage);
@@ -138,6 +142,8 @@ public class BitmapProcessing extends VideoRenderProcessing<MultiSpectral<ImageF
     class GetLocationAsync extends AsyncTask<String,Void, String>
     {
 
+        private static final String BASE_URL = "http://192.168.1.178:8080/";
+        //private static final String BASE_URL = "http://192.168.1.104:8080/";
         /**
          * <p>Runs on the UI thread after {@link #doInBackground}. The specified result is the value returned by {@link #doInBackground}.</p>
          * <p/>
@@ -188,7 +194,7 @@ public class BitmapProcessing extends VideoRenderProcessing<MultiSpectral<ImageF
             URL url;
             String response = "";
             try {
-                url = new URL("http://192.168.11.252:8080/StrutsMavenProject/image.json");
+                url = new URL(BASE_URL + "image.json");
 
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setReadTimeout(15000);
@@ -226,6 +232,15 @@ public class BitmapProcessing extends VideoRenderProcessing<MultiSpectral<ImageF
             long stop = System.currentTimeMillis();
             long diff = stop - start;
             Log.e("SERVER_REST", String.valueOf(diff) + " " + response);
+            if(!response.equals(""))
+            {
+                try {
+                    JSONObject jsonObject = new JSONObject(response);
+                    location = jsonObject.getString("location");
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
             return response;
 
         }

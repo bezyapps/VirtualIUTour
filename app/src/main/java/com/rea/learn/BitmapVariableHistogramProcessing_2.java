@@ -65,9 +65,11 @@ import boofcv.struct.image.MultiSpectral;
 
     private ImageFloat32 lastServerImage;
 
-    public BitmapVariableHistogramProcessing_2(Context context, int width, int height) {
+     MainActivity mainActivity;
+    public BitmapVariableHistogramProcessing_2(MainActivity context, int width, int height) {
         super(ImageType.ms(3, ImageFloat32.class));
         this.width = width;
+        this.mainActivity = context;
         this.height = height;
         img_ar = BitmapFactory.decodeResource(context.getResources(),R.drawable.ar);
         output = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
@@ -77,10 +79,12 @@ import boofcv.struct.image.MultiSpectral;
         this.ipAddress = "http://192.168.11.252:8080/StrutsMavenProject/image.json";
         initPaint(context,Color.RED,17);
     }
-    public BitmapVariableHistogramProcessing_2(Context context, int width, int height, String ipAddress, int skipRate) {
+    public BitmapVariableHistogramProcessing_2(MainActivity context, int width, int height, String ipAddress, int skipRate) {
         super(ImageType.ms(3, ImageFloat32.class));
         this.width = width;
+        this.mainActivity = context;
         this.height = height;
+        img_ar = BitmapFactory.decodeResource(context.getResources(),R.drawable.ar);
         output = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         outputGUI = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         grayBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
@@ -143,17 +147,23 @@ import boofcv.struct.image.MultiSpectral;
     }
 
 
-    private void postImageToServer(ImageFloat32 currentFrame, Bitmap grayBitmap)
+    private void postImageToServer(final ImageFloat32 currentFrame, Bitmap grayBitmap)
     {
         ConvertBitmap.grayToBitmap(currentFrame, grayBitmap, storage);
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         grayBitmap.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream);
         byte[] data = byteArrayOutputStream.toByteArray();
-        String img = Base64.encodeToString(data, Base64.DEFAULT);
-        GetLocationAsync getLocationAsync = new GetLocationAsync();
-        getLocationAsync.execute(img);
-        lastServerImage = currentFrame;
-        lastServerTime = System.currentTimeMillis();
+        final String img = Base64.encodeToString(data, Base64.DEFAULT);
+        mainActivity.runOnUiThread(new Runnable() {
+            @Override
+            public synchronized void run() {
+                GetLocationAsync getLocationAsync = new GetLocationAsync();
+                getLocationAsync.execute(img);
+                lastServerImage = currentFrame;
+                lastServerTime = System.currentTimeMillis();
+            }
+        });
+
     }
 
 

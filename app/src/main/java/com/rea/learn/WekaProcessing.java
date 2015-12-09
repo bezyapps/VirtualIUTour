@@ -1,39 +1,12 @@
 package com.rea.learn;
 
-import android.content.Context;
-import android.content.res.AssetManager;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.util.Log;
 
-import org.ddogleg.struct.FastQueue;
-
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
-
-import boofcv.abst.feature.associate.AssociateDescription;
-import boofcv.abst.feature.associate.ScoreAssociation;
-import boofcv.abst.feature.detdesc.DetectDescribePoint;
-import boofcv.alg.descriptor.UtilFeature;
-import boofcv.android.ConvertBitmap;
 import boofcv.android.gui.VideoRenderProcessing;
-import boofcv.core.image.ConvertImage;
-import boofcv.factory.feature.associate.FactoryAssociation;
-import boofcv.struct.feature.AssociatedIndex;
 import boofcv.struct.feature.TupleDesc;
-import boofcv.struct.image.ImageUInt8;
 import boofcv.struct.image.ImageType;
+import boofcv.struct.image.ImageUInt8;
 import boofcv.struct.image.MultiSpectral;
-import georegression.struct.point.Point2D_F64;
 
 
 /**
