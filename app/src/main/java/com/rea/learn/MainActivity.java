@@ -66,10 +66,10 @@ public class MainActivity extends VideoDisplayActivity {
 
         Intent intent = getIntent();
         if(intent.hasExtra(Settings.IP_ADDRESS) && intent.hasExtra(Settings.SKIP_RATE)){
-            setProcessing(new BitmapVariableHistoGramProcessing(this,s.width,s.height,intent.getStringExtra(Settings.IP_ADDRESS).trim(),intent.getIntExtra(Settings.SKIP_RATE,7)));
+            setProcessing(new BitmapVariableHistogramProcessing_2(this,s.width,s.height,intent.getStringExtra(Settings.IP_ADDRESS).trim(),intent.getIntExtra(Settings.SKIP_RATE,7)));
         }
         else {
-            setProcessing(new BitmapVariableHistoGramProcessing(this,s.width,s.height));
+            setProcessing(new BitmapVariableHistogramProcessing_2(this,s.width,s.height));
         }
 
         return mCamera;
