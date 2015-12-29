@@ -14,6 +14,7 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -29,6 +30,7 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Vector;
 
 import javax.net.ssl.HttpsURLConnection;
 
@@ -99,12 +101,12 @@ public class BitmapVariableHistoGramProcessing extends VideoRenderProcessing<Mul
         initAugmentView(mainActivity);
     }
 
-    private void initAugmentView(MainActivity mainActivity) {
+    private synchronized void initAugmentView(MainActivity mainActivity) {
         LayoutInflater layoutInflater = LayoutInflater.from(mainActivity);
         augmentView = layoutInflater.inflate(R.layout.augment, null);
         markerButton = (Button) augmentView.findViewById(R.id.buttonMarker);
         listViewClassSchedules = (ListView) augmentView.findViewById(R.id.listViewClassSchedules);
-        listViewClassSchedules.setAdapter(new ArrayAdapter<String>(mainActivity,android.R.layout.simple_list_item_1,new String[]{"Test","Hello","World"}));
+        listViewClassSchedules.setAdapter(new ArrayAdapter<String>(mainActivity, android.R.layout.simple_list_item_1, new String[]{"Test", "Hello", "World"}));
         mainActivity.addContentView(augmentView, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
         augmentView.bringToFront();
         markerButton.setOnClickListener(new View.OnClickListener() {
@@ -145,7 +147,7 @@ public class BitmapVariableHistoGramProcessing extends VideoRenderProcessing<Mul
     protected void render(Canvas canvas, double imageToOutput) {
         synchronized (new Object()) {
             canvas.drawBitmap(outputGUI, 0, 0, null);
-            canvas.drawText(location, 75, 75, paint);
+          //  canvas.drawText(location, 75, 75, paint);
         }
     }
 
@@ -269,28 +271,42 @@ public class BitmapVariableHistoGramProcessing extends VideoRenderProcessing<Mul
         }
 
         @Override
-        protected void onPostExecute(String s) {
+        protected void onPostExecute(final String s) {
             super.onPostExecute(s);
             mainActivity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
+                    JSONObject jsonObject = null;
+                    String day = "";
+                    String displayMarkerName = "";
+                    Vector<Schedule> schedules = new Vector<Schedule>();
+                    try {
+                        jsonObject = new JSONObject(s);
+                        JSONObject jsonObjectString = new JSONObject(jsonObject.getString("location"));
+                        day = jsonObjectString.getString("day");
+                        displayMarkerName = jsonObjectString.getString("displayMarkerName");
+                        JSONArray jsonArray = jsonObjectString.getJSONArray("schedules");
+
+                        for(int i = 0; i < jsonArray.length() ; i++)
+                        {
+                            JSONObject object = new JSONObject(jsonArray.getString(i));
+                            Schedule schedule = new Schedule();
+                            schedule.setClassName(object.getString("className"));
+                            schedule.setStartTime(object.getString("startTime"));
+                            schedule.setEndTime(object.getString("endTime"));
+                            schedule.setIsCurrent(object.getBoolean("isCurrent"));
+                            schedules.add(schedule);
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
                     augmentView.setVisibility(View.VISIBLE);
+                    markerButton.setText(displayMarkerName);
+                    listViewClassSchedules.setAdapter(new ArrayAdapter<Schedule>(mainActivity,android.R.layout.simple_list_item_1,schedules));
                 }
             });
-
         }
 
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            mainActivity.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    augmentView.setVisibility(View.GONE);
-                }
-            });
-
-        }
     }
 }
 
