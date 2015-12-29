@@ -99,7 +99,7 @@ public class CSVProcessing<Desc extends TupleDesc> extends VideoRenderProcessing
 
         ///// We read the object image from resources. If you want to try you own image, then put a image in the
         ///// res/drawable folder with the name of 'camera_image.jpg' because that is the image we get here
-       /* Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.camera_image);
+       /* Bitmap bitmap = BitmapFactory.decodeResource(mainActivity.getResources(), R.drawable.camera_image);
         ImageFloat32 imageFloat32 = new ImageFloat32(bitmap.getWidth(),bitmap.getHeight());
         byte[] storage = null;
         ConvertBitmap.declareStorage(bitmap, storage);

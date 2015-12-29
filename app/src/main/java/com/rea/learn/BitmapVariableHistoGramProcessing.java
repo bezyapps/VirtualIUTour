@@ -1,6 +1,5 @@
 package com.rea.learn;
 
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -8,6 +7,12 @@ import android.graphics.Paint;
 import android.os.AsyncTask;
 import android.util.Base64;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.ListView;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -74,7 +79,13 @@ public class BitmapVariableHistoGramProcessing extends VideoRenderProcessing<Mul
 
     private ImageFloat32 lastServerImage;
 
-    public BitmapVariableHistoGramProcessing(Context context, int width, int height) {
+    MainActivity mainActivity;
+
+    View augmentView;
+    Button markerButton;
+    ListView listViewClassSchedules;
+
+    public BitmapVariableHistoGramProcessing(MainActivity mainActivity, int width, int height) {
         super(ImageType.ms(3, ImageFloat32.class));
         this.width = width;
         this.height = height;
@@ -83,9 +94,32 @@ public class BitmapVariableHistoGramProcessing extends VideoRenderProcessing<Mul
         grayBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         this.skipRate = 7;
         this.ipAddress = "http://192.168.11.252:8080/StrutsMavenProject/image.json";
-        initPaint(Color.RED,17);
+        initPaint(Color.RED, 17);
+        this.mainActivity = mainActivity;
+        initAugmentView(mainActivity);
     }
-    public BitmapVariableHistoGramProcessing(Context context, int width, int height, String ipAddress, int skipRate) {
+
+    private void initAugmentView(MainActivity mainActivity) {
+        LayoutInflater layoutInflater = LayoutInflater.from(mainActivity);
+        augmentView = layoutInflater.inflate(R.layout.augment, null);
+        markerButton = (Button) augmentView.findViewById(R.id.buttonMarker);
+        listViewClassSchedules = (ListView) augmentView.findViewById(R.id.listViewClassSchedules);
+        listViewClassSchedules.setAdapter(new ArrayAdapter<String>(mainActivity,android.R.layout.simple_list_item_1,new String[]{"Test","Hello","World"}));
+        mainActivity.addContentView(augmentView, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+        augmentView.bringToFront();
+        markerButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (listViewClassSchedules.getVisibility() == View.GONE) {
+                    listViewClassSchedules.setVisibility(View.VISIBLE);
+                } else {
+                    listViewClassSchedules.setVisibility(View.GONE);
+                }
+            }
+        });
+    }
+
+    public BitmapVariableHistoGramProcessing(MainActivity mainActivity, int width, int height, String ipAddress, int skipRate) {
         super(ImageType.ms(3, ImageFloat32.class));
         this.width = width;
         this.height = height;
@@ -95,11 +129,12 @@ public class BitmapVariableHistoGramProcessing extends VideoRenderProcessing<Mul
         this.ipAddress = ipAddress;
         //this.skipRate = skipRate;
         this.skipRate = skipRate * 1000;
-        initPaint(Color.RED,17);
+        initPaint(Color.RED, 17);
+        this.mainActivity = mainActivity;
+        initAugmentView(mainActivity);
     }
 
-    private void initPaint(int color, float textSize)
-    {
+    private void initPaint(int color, float textSize) {
         paint = new Paint();
         paint.setColor(color);
         paint.setTextSize(textSize);
@@ -110,7 +145,7 @@ public class BitmapVariableHistoGramProcessing extends VideoRenderProcessing<Mul
     protected void render(Canvas canvas, double imageToOutput) {
         synchronized (new Object()) {
             canvas.drawBitmap(outputGUI, 0, 0, null);
-            canvas.drawText(location,75,75,paint);
+            canvas.drawText(location, 75, 75, paint);
         }
     }
 
@@ -131,22 +166,20 @@ public class BitmapVariableHistoGramProcessing extends VideoRenderProcessing<Mul
         ImageFloat32 currentFrame = new ImageFloat32(imageFloat32MultiSpectral.width, imageFloat32MultiSpectral.height);
         ConvertImage.average(imageFloat32MultiSpectral, currentFrame);
         //if(frameCount % skipRate == 0) {
-        if(lastServerImage == null) {
-            postImageToServer(currentFrame,grayBitmap);
-        }
-        else {
-            double error = ImageStatistics.meanDiffAbs(lastServerImage,currentFrame);
+        if (lastServerImage == null) {
+            postImageToServer(currentFrame, grayBitmap);
+        } else {
+            double error = ImageStatistics.meanDiffAbs(lastServerImage, currentFrame);
             long lastPingDiff = System.currentTimeMillis() - lastServerTime;
-            if(error > 35 || lastPingDiff >= skipRate) {
-                Log.e("SERVER_ERROR" , "Error: " + String.valueOf(error) + "----- Server Time: " + lastPingDiff);
+            if (error > 35 || lastPingDiff >= skipRate) {
+                Log.e("SERVER_ERROR", "Error: " + String.valueOf(error) + "----- Server Time: " + lastPingDiff);
                 postImageToServer(currentFrame, grayBitmap);
             }
         }
     }
 
 
-    private void postImageToServer(ImageFloat32 currentFrame, Bitmap grayBitmap)
-    {
+    private void postImageToServer(ImageFloat32 currentFrame, Bitmap grayBitmap) {
         ConvertBitmap.grayToBitmap(currentFrame, grayBitmap, storage);
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         grayBitmap.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream);
@@ -159,12 +192,11 @@ public class BitmapVariableHistoGramProcessing extends VideoRenderProcessing<Mul
     }
 
 
-    class GetLocationAsync extends AsyncTask<String,Void, String>
-    {
+    class GetLocationAsync extends AsyncTask<String, Void, String> {
         private String getPostDataString(HashMap<String, String> params) throws UnsupportedEncodingException {
             StringBuilder result = new StringBuilder();
             boolean first = true;
-            for(Map.Entry<String, String> entry : params.entrySet()){
+            for (Map.Entry<String, String> entry : params.entrySet()) {
                 if (first)
                     first = false;
                 else
@@ -197,8 +229,8 @@ public class BitmapVariableHistoGramProcessing extends VideoRenderProcessing<Mul
                 conn.setDoInput(true);
                 conn.setDoOutput(true);
 
-                HashMap<String ,String> postDataParams = new HashMap<>();
-                postDataParams.put("data",params[0]);
+                HashMap<String, String> postDataParams = new HashMap<>();
+                postDataParams.put("data", params[0]);
                 OutputStream os = conn.getOutputStream();
                 BufferedWriter writer = new BufferedWriter(
                         new OutputStreamWriter(os, "UTF-8"));
@@ -207,17 +239,16 @@ public class BitmapVariableHistoGramProcessing extends VideoRenderProcessing<Mul
                 writer.flush();
                 writer.close();
                 os.close();
-                int responseCode=conn.getResponseCode();
+                int responseCode = conn.getResponseCode();
 
                 if (responseCode == HttpsURLConnection.HTTP_OK) {
                     String line;
-                    BufferedReader br=new BufferedReader(new InputStreamReader(conn.getInputStream()));
-                    while ((line=br.readLine()) != null) {
-                        response+=line;
+                    BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                    while ((line = br.readLine()) != null) {
+                        response += line;
                     }
-                }
-                else {
-                    response="";
+                } else {
+                    response = "";
 
                 }
             } catch (Exception e) {
@@ -235,6 +266,30 @@ public class BitmapVariableHistoGramProcessing extends VideoRenderProcessing<Mul
                 e.printStackTrace();
             }
             return response;
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            super.onPostExecute(s);
+            mainActivity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    augmentView.setVisibility(View.VISIBLE);
+                }
+            });
+
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            mainActivity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    augmentView.setVisibility(View.GONE);
+                }
+            });
+
         }
     }
 }

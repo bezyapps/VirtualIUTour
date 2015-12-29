@@ -65,7 +65,7 @@ public class WekaProcessing<Desc extends TupleDesc> extends VideoRenderProcessin
     private Bitmap output;
     private int width, height;
     private BayesNet bayesNet;
-    Context context;
+    Context mainActivity;
 
     String[] tags = {"E - 303", "E - 304"};
     int[] tag_count = {0, 0};
@@ -87,7 +87,7 @@ public class WekaProcessing<Desc extends TupleDesc> extends VideoRenderProcessin
 
     private Object getModel(String modelName) {
         try {
-            AssetManager assetManager = context.getAssets();
+            AssetManager assetManager = mainActivity.getAssets();
             InputStream inputStream = assetManager.open(modelName);
             Object model = ((new ObjectInputStream(inputStream)).readObject());
             return model;
@@ -99,13 +99,13 @@ public class WekaProcessing<Desc extends TupleDesc> extends VideoRenderProcessin
         return null;
     }
 
-    public WekaProcessing(Context context, int width, int height) {
+    public WekaProcessing(Context mainActivity, int width, int height) {
         super(ImageType.ms(3, ImageUInt8.class));
         detDesc = CreateDetectorDescriptor.create(CreateDetectorDescriptor.DETECT_FH, CreateDetectorDescriptor.DESC_SURF, ImageUInt8.class);
         this.width = width;
         this.height = height;
         listDst = UtilFeature.createQueue(detDesc, 10);
-        this.context = context;
+        this.mainActivity = mainActivity;
         buildHeader();
         bayesNet = (BayesNet) getModel("bayesnet.model");
         output = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
