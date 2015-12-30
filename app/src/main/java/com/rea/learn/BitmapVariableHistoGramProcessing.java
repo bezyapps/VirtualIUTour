@@ -5,6 +5,8 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.AsyncTask;
+import android.os.Build;
+import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -83,9 +85,12 @@ public class BitmapVariableHistoGramProcessing extends VideoRenderProcessing<Mul
 
     MainActivity mainActivity;
 
-    View augmentView;
-    Button markerButton;
-    ListView listViewClassSchedules;
+//    View augmentView;
+//    Button markerButton;
+//    ListView listViewClassSchedules;
+//
+//    ScheduleAdapter scheduleAdapter;
+//    Vector<Schedule> schedules;
 
     public BitmapVariableHistoGramProcessing(MainActivity mainActivity, int width, int height) {
         super(ImageType.ms(3, ImageFloat32.class));
@@ -98,28 +103,9 @@ public class BitmapVariableHistoGramProcessing extends VideoRenderProcessing<Mul
         this.ipAddress = "http://192.168.11.252:8080/StrutsMavenProject/image.json";
         initPaint(Color.RED, 17);
         this.mainActivity = mainActivity;
-        initAugmentView(mainActivity);
+        //    initAugmentView(mainActivity);
     }
 
-    private synchronized void initAugmentView(MainActivity mainActivity) {
-        LayoutInflater layoutInflater = LayoutInflater.from(mainActivity);
-        augmentView = layoutInflater.inflate(R.layout.augment, null);
-        markerButton = (Button) augmentView.findViewById(R.id.buttonMarker);
-        listViewClassSchedules = (ListView) augmentView.findViewById(R.id.listViewClassSchedules);
-        listViewClassSchedules.setAdapter(new ArrayAdapter<String>(mainActivity, android.R.layout.simple_list_item_1, new String[]{"Test", "Hello", "World"}));
-        mainActivity.addContentView(augmentView, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
-        augmentView.bringToFront();
-        markerButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (listViewClassSchedules.getVisibility() == View.GONE) {
-                    listViewClassSchedules.setVisibility(View.VISIBLE);
-                } else {
-                    listViewClassSchedules.setVisibility(View.GONE);
-                }
-            }
-        });
-    }
 
     public BitmapVariableHistoGramProcessing(MainActivity mainActivity, int width, int height, String ipAddress, int skipRate) {
         super(ImageType.ms(3, ImageFloat32.class));
@@ -133,7 +119,7 @@ public class BitmapVariableHistoGramProcessing extends VideoRenderProcessing<Mul
         this.skipRate = skipRate * 1000;
         initPaint(Color.RED, 17);
         this.mainActivity = mainActivity;
-        initAugmentView(mainActivity);
+        //   initAugmentView(mainActivity);
     }
 
     private void initPaint(int color, float textSize) {
@@ -147,7 +133,7 @@ public class BitmapVariableHistoGramProcessing extends VideoRenderProcessing<Mul
     protected void render(Canvas canvas, double imageToOutput) {
         synchronized (new Object()) {
             canvas.drawBitmap(outputGUI, 0, 0, null);
-          //  canvas.drawText(location, 75, 75, paint);
+            //  canvas.drawText(location, 75, 75, paint);
         }
     }
 
@@ -173,7 +159,8 @@ public class BitmapVariableHistoGramProcessing extends VideoRenderProcessing<Mul
         } else {
             double error = ImageStatistics.meanDiffAbs(lastServerImage, currentFrame);
             long lastPingDiff = System.currentTimeMillis() - lastServerTime;
-            if (error > 35 || lastPingDiff >= skipRate) {
+            if ((error > 35 || lastPingDiff >= skipRate) && (mainActivity.listViewClassSchedules.getVisibility() == View.GONE || mainActivity.scheduleAdapter.getCount()
+                    == 0)) {
                 Log.e("SERVER_ERROR", "Error: " + String.valueOf(error) + "----- Server Time: " + lastPingDiff);
                 postImageToServer(currentFrame, grayBitmap);
             }
@@ -276,6 +263,7 @@ public class BitmapVariableHistoGramProcessing extends VideoRenderProcessing<Mul
             mainActivity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
+                    mainActivity.scheduleAdapter.clear();
                     JSONObject jsonObject = null;
                     String day = "";
                     String displayMarkerName = "";
@@ -287,8 +275,7 @@ public class BitmapVariableHistoGramProcessing extends VideoRenderProcessing<Mul
                         displayMarkerName = jsonObjectString.getString("displayMarkerName");
                         JSONArray jsonArray = jsonObjectString.getJSONArray("schedules");
 
-                        for(int i = 0; i < jsonArray.length() ; i++)
-                        {
+                        for (int i = 0; i < jsonArray.length(); i++) {
                             JSONObject object = new JSONObject(jsonArray.getString(i));
                             Schedule schedule = new Schedule();
                             schedule.setClassName(object.getString("className"));
@@ -300,9 +287,22 @@ public class BitmapVariableHistoGramProcessing extends VideoRenderProcessing<Mul
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
-                    augmentView.setVisibility(View.VISIBLE);
-                    markerButton.setText(displayMarkerName);
-                    listViewClassSchedules.setAdapter(new ArrayAdapter<Schedule>(mainActivity,android.R.layout.simple_list_item_1,schedules));
+                    if (TextUtils.isEmpty(displayMarkerName)) {
+                        mainActivity.augmentView.setVisibility(View.GONE);
+                    } else {
+                        mainActivity.augmentView.setVisibility(View.VISIBLE);
+                        mainActivity.markerButton.setText(displayMarkerName);
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+                            mainActivity.scheduleAdapter.addAll(schedules);
+                        } else {
+                            for (Schedule schedule : schedules) {
+                                mainActivity.scheduleAdapter.add(schedule);
+                            }
+                        }
+                        mainActivity.listViewClassSchedules.setVisibility(View.GONE);
+                        mainActivity.scheduleAdapter.notifyDataSetChanged();
+                    }
+
                 }
             });
         }
