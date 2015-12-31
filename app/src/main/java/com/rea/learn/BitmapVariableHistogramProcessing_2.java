@@ -30,8 +30,10 @@ import java.util.Map;
 import javax.net.ssl.HttpsURLConnection;
 
 import boofcv.alg.misc.ImageStatistics;
+
 import boofcv.android.ConvertBitmap;
 import boofcv.android.gui.VideoRenderProcessing;
+
 import boofcv.core.image.ConvertImage;
 import boofcv.struct.image.ImageFloat32;
 import boofcv.struct.image.ImageType;

@@ -248,6 +248,7 @@ public class BitmapVariableHistoGramProcessing extends VideoRenderProcessing<Mul
             time = time + diff;
             Log.e("SERVER_REST", String.valueOf(diff));
             Log.e("SERVER_AVG", String.valueOf(time / count));
+            Log.e("Response", response);
             try {
                 JSONObject jsonObject = new JSONObject(response);
                 location = jsonObject.getString("location");

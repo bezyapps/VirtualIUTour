@@ -33,7 +33,6 @@ public class MainActivity extends VideoDisplayActivity {
 
 
     boolean change = false;
-    ColouredTrackingProcessing colouredTrackingProcessing;
     View augmentView;
     Button markerButton;
     ListView listViewClassSchedules;
@@ -119,32 +118,6 @@ public class MainActivity extends VideoDisplayActivity {
         } else {
             return Camera.open(selected);
         }
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        menu.getItem(0).setTitle(Html.fromHtml("<font color='white'>One Object</font>"));
-        menu.getItem(1).setTitle(Html.fromHtml("<font color='white'>Two Object</font>"));
-        menu.getItem(2).setTitle(Html.fromHtml("<font color='white'>Object CSV</font>"));
-        return true;
-    }
-
-
-    @Override
-    public boolean onMenuItemSelected(int featureId, MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.action_one_object:
-                setProcessing(new MatchProcessing(this, s.width, s.height));
-                break;
-            case R.id.action_two_object:
-                setProcessing(new TwoObjectProcessing(this, s.width, s.height));
-                break;
-            case R.id.action_csv:
-                setProcessing(new CSVProcessing(this, s.width, s.height));
-                break;
-        }
-        return true;
     }
 
     @Override
