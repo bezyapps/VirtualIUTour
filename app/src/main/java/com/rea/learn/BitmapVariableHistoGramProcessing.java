@@ -9,12 +9,7 @@ import android.os.Build;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.LinearLayout;
-import android.widget.ListView;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -100,10 +95,9 @@ public class BitmapVariableHistoGramProcessing extends VideoRenderProcessing<Mul
         outputGUI = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         grayBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         this.skipRate = 7;
-        this.ipAddress = "http://192.168.11.252:8080/StrutsMavenProject/image.json";
+        this.ipAddress = "http://192.168.11.252:8080/image.json";
         initPaint(Color.RED, 17);
         this.mainActivity = mainActivity;
-        //    initAugmentView(mainActivity);
     }
 
 
@@ -119,7 +113,6 @@ public class BitmapVariableHistoGramProcessing extends VideoRenderProcessing<Mul
         this.skipRate = skipRate * 1000;
         initPaint(Color.RED, 17);
         this.mainActivity = mainActivity;
-        //   initAugmentView(mainActivity);
     }
 
     private void initPaint(int color, float textSize) {
@@ -133,7 +126,6 @@ public class BitmapVariableHistoGramProcessing extends VideoRenderProcessing<Mul
     protected void render(Canvas canvas, double imageToOutput) {
         synchronized (new Object()) {
             canvas.drawBitmap(outputGUI, 0, 0, null);
-            //  canvas.drawText(location, 75, 75, paint);
         }
     }
 

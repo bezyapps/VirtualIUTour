@@ -30,9 +30,6 @@ import boofcv.android.gui.VideoDisplayActivity;
 
 
 public class MainActivity extends VideoDisplayActivity {
-
-
-    boolean change = false;
     View augmentView;
     Button markerButton;
     ListView listViewClassSchedules;
@@ -76,6 +73,7 @@ public class MainActivity extends VideoDisplayActivity {
             }
         });
     }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -102,7 +100,6 @@ public class MainActivity extends VideoDisplayActivity {
         int selected = -1;
         for (int i = 0; i < numberOfCameras; i++) {
             Camera.getCameraInfo(i, cameraInfo);
-
             if (cameraInfo.facing == Camera.CameraInfo.CAMERA_FACING_BACK) {
                 selected = i;
                 break;
@@ -111,7 +108,6 @@ public class MainActivity extends VideoDisplayActivity {
                 selected = i;
             }
         }
-
         if (selected == -1) {
             dialogNoCamera();
             return null; // won't ever be called
@@ -120,32 +116,13 @@ public class MainActivity extends VideoDisplayActivity {
         }
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int test = item.getItemId();
-        String title = item.getTitle().toString();
-        Log.e("TEST ", test + title);
-        switch (item.getItemId()) {
-            case R.id.action_one_object:
-                Toast.makeText(this, "TEST", Toast.LENGTH_LONG).show();
-                break;
-            case R.id.action_two_object:
-                Toast.makeText(this, "TEST2", Toast.LENGTH_LONG).show();
-                break;
-            case R.id.action_csv:
-                Toast.makeText(this, "TEST3", Toast.LENGTH_LONG).show();
-                break;
-        }
-        return true;
-    }
-
     private void dialogNoCamera() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage("Your device has no cameras!")
                 .setCancelable(false)
                 .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        System.exit(0);
+                        finish();
                     }
                 });
         AlertDialog alert = builder.create();
