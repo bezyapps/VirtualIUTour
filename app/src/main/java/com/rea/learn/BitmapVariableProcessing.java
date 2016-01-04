@@ -109,6 +109,10 @@ public class BitmapVariableProcessing extends VideoRenderProcessing<MultiSpectra
     }
 
 
+    int count = 0;
+    long time = 0;
+
+
     @Override
     protected void process(MultiSpectral<ImageFloat32> imageFloat32MultiSpectral) {
         frameCount++;
@@ -129,55 +133,11 @@ public class BitmapVariableProcessing extends VideoRenderProcessing<MultiSpectra
             GetLocationAsync getLocationAsync = new GetLocationAsync();
             getLocationAsync.execute(img);
         }
-    //    String img = new String(data);
-    //    Log.e("STRING_DATA",img);
-
-       /* File file = new File(Environment.getExternalStorageDirectory() + "/learn");
-        if (!file.exists()) {
-            file.mkdirs();
-        }
-        File image = new File(file.getAbsolutePath() + "/" + System.currentTimeMillis());
-
-        try {
-            PrintWriter printWriter =  new PrintWriter(image);
-            printWriter.println(img);
-            /*FileOutputStream fileOutputStream = new FileOutputStream(image);
-            fileOutputStream.write(data);
-            fileOutputStream.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-*/
-                /*
-                private String convert(byte[] data) throws Exception
-	{
-		BufferedImage bufferedImage = ImageIO.read(new ByteArrayInputStream(data));
-		ImageFloat32 float32 = new ImageFloat32();
-		ConvertBufferedImage.convertFrom(bufferedImage, float32);
-		return null;
-	}
-
-                 */
-
     }
 
 
     class GetLocationAsync extends AsyncTask<String,Void, String>
     {
-
-        /**
-         * <p>Runs on the UI thread after {@link #doInBackground}. The specified result is the value returned by {@link #doInBackground}.</p>
-         * <p/>
-         * <p>This method won't be invoked if the task was cancelled.</p>
-         *
-         * @params The result of the operation computed by {@link #doInBackground}.
-         * @see #onPreExecute
-         * @see #doInBackground
-         * @see #onCancelled(Object)
-         */
-
         private String getPostDataString(HashMap<String, String> params) throws UnsupportedEncodingException {
             StringBuilder result = new StringBuilder();
             boolean first = true;
@@ -196,22 +156,10 @@ public class BitmapVariableProcessing extends VideoRenderProcessing<MultiSpectra
         }
 
 
-        /**
-         * Override this method to perform a computation on a background thread. The specified parameters are the parameters passed to {@link #execute} by the caller
-         * of this
-         * task.
-         * <p/>
-         * This method can call {@link #publishProgress} to publish updates on the UI thread.
-         *
-         * @param params The parameters of the task.
-         * @return A result, defined by the subclass of this task.
-         * @see #onPreExecute()
-         * @see #onPostExecute
-         * @see #publishProgress
-         */
         @Override
         protected String doInBackground(String... params) {
 
+            count++;
             long start = System.currentTimeMillis();
 
             URL url;
@@ -254,26 +202,18 @@ public class BitmapVariableProcessing extends VideoRenderProcessing<MultiSpectra
             }
             long stop = System.currentTimeMillis();
             long diff = stop - start;
-            Log.e("SERVER_REST", String.valueOf(diff) + " " + response);
+            time = time + diff;
+            Log.e("SERVER_REST", String.valueOf(diff));
+            Log.e("SERVER_AVG", String.valueOf(time / count));
             try {
                 JSONObject jsonObject = new JSONObject(response);
                 location = jsonObject.getString("location");
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-
             return response;
-
         }
-
-
     }
-
-
-
-
-
-
 }
 
 
