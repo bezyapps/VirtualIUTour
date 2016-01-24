@@ -80,6 +80,8 @@ public class BitmapVariableHistoGramProcessing extends VideoRenderProcessing<Mul
 
     MainActivity mainActivity;
 
+    private final int DIFFERENCE_THRESHOLD = 45;
+
 //    View augmentView;
 //    Button markerButton;
 //    ListView listViewClassSchedules;
@@ -129,10 +131,8 @@ public class BitmapVariableHistoGramProcessing extends VideoRenderProcessing<Mul
         }
     }
 
-
     int count = 0;
     long time = 0;
-
 
     @Override
     protected void process(MultiSpectral<ImageFloat32> imageFloat32MultiSpectral) {
@@ -151,7 +151,7 @@ public class BitmapVariableHistoGramProcessing extends VideoRenderProcessing<Mul
         } else {
             double error = ImageStatistics.meanDiffAbs(lastServerImage, currentFrame);
             long lastPingDiff = System.currentTimeMillis() - lastServerTime;
-            if ((error > 35 || lastPingDiff >= skipRate) && (mainActivity.listViewClassSchedules.getVisibility() == View.GONE || mainActivity.scheduleAdapter.getCount()
+            if ((error > DIFFERENCE_THRESHOLD || lastPingDiff >= skipRate) && (mainActivity.listViewClassSchedules.getVisibility() == View.GONE || mainActivity.scheduleAdapter.getCount()
                     == 0)) {
                 Log.e("SERVER_ERROR", "Error: " + String.valueOf(error) + "----- Server Time: " + lastPingDiff);
                 postImageToServer(currentFrame, grayBitmap);
@@ -267,7 +267,6 @@ public class BitmapVariableHistoGramProcessing extends VideoRenderProcessing<Mul
                         day = jsonObjectString.getString("day");
                         displayMarkerName = jsonObjectString.getString("displayMarkerName");
                         JSONArray jsonArray = jsonObjectString.getJSONArray("schedules");
-
                         for (int i = 0; i < jsonArray.length(); i++) {
                             JSONObject object = new JSONObject(jsonArray.getString(i));
                             Schedule schedule = new Schedule();
@@ -295,11 +294,9 @@ public class BitmapVariableHistoGramProcessing extends VideoRenderProcessing<Mul
                         mainActivity.listViewClassSchedules.setVisibility(View.GONE);
                         mainActivity.scheduleAdapter.notifyDataSetChanged();
                     }
-
                 }
             });
         }
-
     }
 }
 

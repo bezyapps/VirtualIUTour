@@ -3,29 +3,20 @@ package com.rea.learn;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Point;
 import android.hardware.Camera;
 import android.os.Bundle;
-import android.text.Html;
 import android.util.Log;
-import android.view.Display;
 import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.Toast;
 
-import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Vector;
 
-import boofcv.android.gui.CameraPreview;
 import boofcv.android.gui.VideoDisplayActivity;
 
 
@@ -35,6 +26,10 @@ public class MainActivity extends VideoDisplayActivity {
     ListView listViewClassSchedules;
     ScheduleAdapter scheduleAdapter;
     Vector<Schedule> schedules;
+
+    private final int CAMERA_WIDTH = 320;
+    private final int CAMERA_HEIGHT = 240;
+
 
     @Override
     protected void onResume() {
@@ -87,7 +82,7 @@ public class MainActivity extends VideoDisplayActivity {
         Camera mCamera = selectAndOpenCamera(cameraInfo);
         Camera.Parameters param = mCamera.getParameters();
         List<Camera.Size> sizes = param.getSupportedPreviewSizes();
-        Camera.Size s = sizes.get(closest(sizes, 320, 240));
+        Camera.Size s = sizes.get(closest(sizes, CAMERA_WIDTH, CAMERA_HEIGHT));
         this.s = s;
         param.setPreviewSize(s.width, s.height);
         Log.e("ERBL", s.width + " , " + s.height);
