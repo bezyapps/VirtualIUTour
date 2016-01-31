@@ -27,6 +27,7 @@ import java.util.Vector;
  */
 public class ScheduleAdapter extends ArrayAdapter<Schedule> {
 
+    static int count =0;
     Context context;
     List<Schedule> schedules;
 
@@ -54,6 +55,7 @@ public class ScheduleAdapter extends ArrayAdapter<Schedule> {
     public View getView(int position, View convertView, ViewGroup parent) {
         View view = convertView;
         ViewHolder holder;
+
         if (view == null) {
             view = LayoutInflater.from(getContext()).inflate(R.layout.augment_list_item, parent, false);
             holder = new ViewHolder(view, getContext());
@@ -66,19 +68,36 @@ public class ScheduleAdapter extends ArrayAdapter<Schedule> {
             holder.textViewClassName.setTextColor(Color.WHITE);
             holder.textViewClassStartTime.setTextColor(Color.WHITE);
             holder.textViewClassEndTime.setTextColor(Color.WHITE);
-            holder.textViewClassName.setBackgroundColor(Color.BLACK);
-            holder.textViewClassStartTime.setBackgroundColor(Color.BLACK);
-            holder.textViewClassEndTime.setBackgroundColor(Color.BLACK);
+            holder.textViewClassName.setBackgroundColor(Color.parseColor("#1976D2"));
+            holder.textViewClassStartTime.setBackgroundColor(Color.parseColor("#1976D2"));
+            holder.textViewClassEndTime.setBackgroundColor(Color.parseColor("#1976D2"));
             view.setBackgroundColor(Color.BLACK);
-        } else {
+            view.bringToFront();
+        }
+        else {
+           if(count %2 == 0)
+           {
             holder.textViewClassName.setTextColor(Color.BLACK);
             holder.textViewClassStartTime.setTextColor(Color.BLACK);
             holder.textViewClassEndTime.setTextColor(Color.BLACK);
-            holder.textViewClassName.setBackgroundColor(Color.WHITE);
-            holder.textViewClassStartTime.setBackgroundColor(Color.WHITE);
-            holder.textViewClassEndTime.setBackgroundColor(Color.WHITE);
-            view.setBackgroundColor(Color.WHITE);
+            holder.textViewClassName.setBackgroundColor(Color.parseColor("#4DB6AC"));
+            holder.textViewClassStartTime.setBackgroundColor(Color.parseColor("#4DB6AC"));
+            holder.textViewClassEndTime.setBackgroundColor(Color.parseColor("#4DB6AC"));
+            view.setBackgroundColor(Color.BLACK);
+            }
+            else
+           {
+               holder.textViewClassName.setTextColor(Color.WHITE);
+               holder.textViewClassStartTime.setTextColor(Color.WHITE);
+               holder.textViewClassEndTime.setTextColor(Color.WHITE);
+               holder.textViewClassName.setBackgroundColor(Color.parseColor("#004D40"));
+               holder.textViewClassStartTime.setBackgroundColor(Color.parseColor("#004D40"));
+               holder.textViewClassEndTime.setBackgroundColor(Color.parseColor("#004D40"));
+               view.setBackgroundColor(Color.BLACK);
+           }
+            count++;
         }
+
         holder.textViewClassName.setText(schedule.getClassName());
         holder.textViewClassStartTime.setText(schedule.getStartTime());
         holder.textViewClassEndTime.setText(schedule.getEndTime());
