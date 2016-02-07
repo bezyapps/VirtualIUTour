@@ -84,6 +84,7 @@ public class ScheduleAdapter extends ArrayAdapter<Schedule> {
             holder.textViewClassStartTime.setBackgroundColor(Color.parseColor("#4DB6AC"));
             holder.textViewClassEndTime.setBackgroundColor(Color.parseColor("#4DB6AC"));
             view.setBackgroundColor(Color.BLACK);
+               view.setAlpha(0.5f);
             }
             else
            {
@@ -94,6 +95,7 @@ public class ScheduleAdapter extends ArrayAdapter<Schedule> {
                holder.textViewClassStartTime.setBackgroundColor(Color.parseColor("#004D40"));
                holder.textViewClassEndTime.setBackgroundColor(Color.parseColor("#004D40"));
                view.setBackgroundColor(Color.BLACK);
+               view.setAlpha(0.5f);
            }
             count++;
         }
