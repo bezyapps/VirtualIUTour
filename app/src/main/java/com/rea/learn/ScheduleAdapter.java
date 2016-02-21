@@ -2,15 +2,14 @@ package com.rea.learn;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.List;
-import java.util.Vector;
 
 /**
  * Created by ericbhatti on 12/30/15.
@@ -84,8 +83,10 @@ public class ScheduleAdapter extends ArrayAdapter<Schedule> {
             holder.textViewClassStartTime.setBackgroundColor(Color.parseColor("#4DB6AC"));
             holder.textViewClassEndTime.setBackgroundColor(Color.parseColor("#4DB6AC"));
             view.setBackgroundColor(Color.BLACK);
-               view.setAlpha(0.5f);
-            }
+               if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+                   view.setAlpha(0.5f);
+               }
+           }
             else
            {
                holder.textViewClassName.setTextColor(Color.WHITE);
@@ -95,7 +96,9 @@ public class ScheduleAdapter extends ArrayAdapter<Schedule> {
                holder.textViewClassStartTime.setBackgroundColor(Color.parseColor("#004D40"));
                holder.textViewClassEndTime.setBackgroundColor(Color.parseColor("#004D40"));
                view.setBackgroundColor(Color.BLACK);
-               view.setAlpha(0.5f);
+               if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+                   view.setAlpha(0.5f);
+               }
            }
             count++;
         }
